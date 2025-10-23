@@ -66,20 +66,20 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: hotel_password
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-      # Paso 5: Generar reporte de resultados de tests
+      # Paso 5: Generar reporte de resultados de tests (solo si existen reportes)
       - name: Publicar resultados de tests
         uses: dorny/test-reporter@v1
-        if: always()
+        if: always() && hashFiles('hotel-premier/target/surefire-reports/*.xml') != ''
         with:
           name: Reporte de Tests Maven
           path: hotel-premier/target/surefire-reports/*.xml
           reporter: java-junit
           fail-on-error: true
 
-      # Paso 6: Subir reporte de cobertura (si existe)
+      # Paso 6: Subir reporte de tests (solo si existe el directorio)
       - name: Subir reporte de tests
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && hashFiles('hotel-premier/target/surefire-reports/*') != ''
         with:
           name: test-results
           path: hotel-premier/target/surefire-reports/

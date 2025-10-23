@@ -1,0 +1,86 @@
+name: CI - Tests Automáticos
+
+# Define cuándo se ejecutará este workflow
+on:
+  # Se ejecuta en cada push a develop y main
+  push:
+    branches: [ develop, main ]
+  # Se ejecuta en cada Pull Request hacia develop y main
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  test:
+    name: Ejecutar Tests
+    runs-on: ubuntu-latest
+
+    # Configuración de servicios necesarios (PostgreSQL)
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: hotel_premier_test
+          POSTGRES_USER: hotel_user
+          POSTGRES_PASSWORD: hotel_password
+        ports:
+          - 5432:5432
+        # Verificación de salud para asegurar que PostgreSQL está listo
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # Paso 1: Checkout del código
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Paso 2: Configurar Java 21
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Paso 3: Verificar conexión a PostgreSQL
+      - name: Verificar PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U hotel_user; do
+            echo "Esperando a PostgreSQL..."
+            sleep 2
+          done
+        env:
+          PGPASSWORD: hotel_password
+
+      # Paso 4: Ejecutar tests con Maven
+      - name: Ejecutar tests con Maven
+        run: |
+          cd hotel-premier
+          ./mvnw clean test --batch-mode --no-transfer-progress
+        env:
+          # Variables de entorno para los tests
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hotel_premier_test
+          SPRING_DATASOURCE_USERNAME: hotel_user
+          SPRING_DATASOURCE_PASSWORD: hotel_password
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+
+      # Paso 5: Generar reporte de resultados de tests
+      - name: Publicar resultados de tests
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Reporte de Tests Maven
+          path: hotel-premier/target/surefire-reports/*.xml
+          reporter: java-junit
+          fail-on-error: true
+
+      # Paso 6: Subir reporte de cobertura (si existe)
+      - name: Subir reporte de tests
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: hotel-premier/target/surefire-reports/
+          retention-days: 30

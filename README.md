@@ -24,6 +24,7 @@ El sistema está diseñado para cubrir las siguientes funcionalidades clave
 * **Frontend**: Thymeleaf para renderizado del lado del servidor, HTML, CSS y JavaScript.
 * **Gestión del Proyecto**: Maven.
 * **Contenerización**: Docker y Docker Compose.
+* **CI/CD**: GitHub Actions para ejecución automática de tests.
 
 ---
 ## 🚀 Guía de Inicio Rápido (Entorno de Desarrollo)
@@ -64,6 +65,19 @@ Este comando hará lo siguiente:
 Una vez que los contenedores estén en funcionamiento, podrás acceder a la aplicación en tu navegador a través de la siguiente URL:
 
 **`http://localhost:8080`**
+
+-----
+
+## 🔄 Integración Continua (CI)
+
+Este proyecto utiliza **GitHub Actions** para ejecutar automáticamente los tests cada vez que se hace un push o se crea un Pull Request hacia las ramas `develop` o `main`.
+
+### ¿Qué verifica el CI?
+- ✅ Compilación exitosa del proyecto
+- ✅ Ejecución de todos los tests unitarios e integración
+- ✅ Compatibilidad con PostgreSQL
+
+Para más detalles sobre cómo funciona el CI, consulta la [Guía de CI](docs/CI-README.md).
 
 -----
 

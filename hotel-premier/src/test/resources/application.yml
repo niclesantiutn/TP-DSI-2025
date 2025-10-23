@@ -1,0 +1,28 @@
+# Configuración para tests en entorno CI (GitHub Actions)
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hotel_premier_test}
+    username: ${SPRING_DATASOURCE_USERNAME:hotel_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:hotel_password}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:create-drop}
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Desactivar Docker Compose para tests
+  docker:
+    compose:
+      enabled: false
+
+# Configuración de logging para tests
+logging:
+  level:
+    com.losmergeconflicts.hotelpremier: INFO
+    org.springframework: WARN
+    org.hibernate: WARN

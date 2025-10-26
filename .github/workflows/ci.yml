@@ -20,23 +20,6 @@ jobs:
     name: Ejecutar Tests
     runs-on: ubuntu-latest
 
-    # Configuración de servicios necesarios (PostgreSQL)
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: hotel_premier_test
-          POSTGRES_USER: hotel_user
-          POSTGRES_PASSWORD: hotel_password
-        ports:
-          - 5432:5432
-        # Verificación de salud para asegurar que PostgreSQL está listo
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       # Paso 1: Checkout del código
       - name: Checkout código
@@ -50,33 +33,17 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Paso 3: Verificar conexión a PostgreSQL
-      - name: Verificar PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U hotel_user; do
-            echo "Esperando a PostgreSQL..."
-            sleep 2
-          done
-        env:
-          PGPASSWORD: hotel_password
-
-      # Paso 4: Dar permisos de ejecución a Maven Wrapper
+      # Paso 3: Dar permisos de ejecución a Maven Wrapper
       - name: Dar permisos a mvnw
         run: chmod +x hotel-premier/mvnw
 
-      # Paso 5: Ejecutar tests con Maven
+      # Paso 4: Ejecutar tests con Maven
       - name: Ejecutar tests con Maven
         run: |
           cd hotel-premier
           ./mvnw clean test --batch-mode --no-transfer-progress
-        env:
-          # Variables de entorno para los tests
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hotel_premier_test
-          SPRING_DATASOURCE_USERNAME: hotel_user
-          SPRING_DATASOURCE_PASSWORD: hotel_password
-          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-      # Paso 6: Generar reporte de resultados de tests (solo si existen reportes)
+      # Paso 5: Generar reporte de resultados de tests (solo si existen reportes)
       - name: Publicar resultados de tests
         uses: dorny/test-reporter@v1
         if: always() && hashFiles('hotel-premier/target/surefire-reports/*.xml') != ''
@@ -86,7 +53,7 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      # Paso 7: Subir reporte de tests (solo si existe el directorio)
+      # Paso 6: Subir reporte de tests (solo si existe el directorio)
       - name: Subir reporte de tests
         uses: actions/upload-artifact@v4
         if: always() && hashFiles('hotel-premier/target/surefire-reports/*') != ''

@@ -19,16 +19,6 @@ CREATE TABLE IF NOT EXISTS conserjes (
 -- Índice para mejorar búsquedas por username
 CREATE INDEX idx_conserjes_username ON conserjes(username);
 
--- ========================================
--- DATOS DE EJEMPLO
--- ========================================
--- Insertar un usuario de prueba
--- Username: admin
--- Password: admin123 (hasheado con BCrypt)
-INSERT INTO conserjes (username, password, role) 
-VALUES ('admin', '$2a$10$xBwSJz5PdKvF5YX9WKQm5OqJ8yZWZzJ5Lb6XvY8qYvC0vQXZvH5Vm', 'ROLE_CONSERJE')
-ON CONFLICT (username) DO NOTHING;
-
 -- Comentarios sobre la tabla:
 -- - id: Identificador único autoincrementable
 -- - username: Nombre de usuario único para login

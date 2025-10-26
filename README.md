@@ -46,7 +46,11 @@ cd TP-DSI-2025
 
 ### **3. Levantar el Entorno**
 
-El proyecto está configurado para funcionar con Docker. Simplemente ejecuta el siguiente comando desde la raíz del repositorio (`TP-DSI-2025/`):
+El proyecto está configurado para funcionar con Docker. 
+
+En la raíz del proyecto hay un archivo **.env.example**, este  archivo contiene varibles de entorno. Editar el nombre del archivo a: **.env**
+
+Ejecuta el siguiente comando desde la raíz del repositorio (`TP-DSI-2025/`):
 
 ```bash
 docker-compose --profile dev up -d --build
@@ -65,19 +69,6 @@ Este comando hará lo siguiente:
 Una vez que los contenedores estén en funcionamiento, podrás acceder a la aplicación en tu navegador a través de la siguiente URL:
 
 **`http://localhost:8080`**
-
------
-
-## 🔄 Integración Continua (CI)
-
-Este proyecto utiliza **GitHub Actions** para ejecutar automáticamente los tests cada vez que se hace un push o se crea un Pull Request hacia las ramas `develop` o `main`.
-
-### ¿Qué verifica el CI?
-- ✅ Compilación exitosa del proyecto
-- ✅ Ejecución de todos los tests unitarios e integración
-- ✅ Compatibilidad con PostgreSQL
-
-Para más detalles sobre cómo funciona el CI, consulta la [Guía de CI](docs/CI-README.md).
 
 -----
 

@@ -36,20 +36,19 @@ Para tener una copia del proyecto en tu computadora, sigue estos pasos:
 Para asegurarte de que todo funciona, vamos a levantar la aplicación con Docker.
 
 1.  **Abre Docker Desktop** y asegúrate de que esté corriendo. Verás el ícono de la ballena en tu barra de tareas.
-2.  Abrir tu editor de código (vscode o cursor) y abre el proyecto.
-3.  Abrir una nueva terminal en tu editor de código, ejecuta el siguiente comando:
+2.  Abrir tu editor de código (Visual Studio Code o Cursor) y abre el proyecto.
+3.  En la raíz del proyecto hay un archivo ".env.example", este  archivo contiene varibles de entorno para que la app usa para conectar la base de datos, pero este archivo solo debe estar en tu PC de forma local. Para que esto funcione, debes editar el nombre del archivo, y el mismo solo debe tener el siguiente nombre:  ".env". Ahora ya tenes configuaradas las variables de entorno, continúa siguiendo los pasos.
+4.  Abrir una nueva terminal en tu editor de código, ejecuta el siguiente comando:
     ```bash
     docker-compose --profile dev up -d --build
     ```
     * **¿Qué hace este comando?** La primera vez, descargará las imágenes necesarias (Java, PostgreSQL), construirá la aplicación y creará los contenedores. La primera vez demorará algunos minutos.
-4. Podes probar la app ingresando las siguientes direcciones en el navegador:
+5. Podes probar la app ingresando las siguientes direcciones en el navegador:
    ```
-   pgadmin: http://localhost:5050/
-   app: http://localhost:8080/
-   user: admin
-   pass: admin123
+   pgadmin: http://localhost:5050/ -> pass: admin
+   app: http://localhost:8080/ -> puedes registrar un usuario si quieres
    ```
-5.  Cuando quieras detener la aplicación, ejecuta en la consola:
+6.  Cuando quieras detener la aplicación, ejecuta en la consola:
     ```bash
     docker-compose --profile dev down
     ```
@@ -143,7 +142,7 @@ El Pull Request es una solicitud para incorporar tus cambios a la rama `develop`
 2.  Verás una notificación para crear un **Pull Request** desde tu rama recién subida. Haz clic en ella. Sino puedes ir a la pesteña **Pull Request**, presionar en **new pull request** y en base poner develop y en compare poner tu rama, luego create **pull request**.
 3.  Asegúrate de que la solicitud sea para fusionar tu rama (`feature/...`) en la rama `develop`. Allí podras visualizar los cambios que quieres introducir en la rama develop.
 4.  Pon un título claro y una breve descripción de los cambios que hiciste.
-5.  Crea el Pull Request y espera a que el administrador del repositorio lo revise y lo apruebe.
+5.  Crea el Pull Request y **espera a que el administrador del repositorio lo revise y lo apruebe**.
 
 -----
 
@@ -155,7 +154,3 @@ El Pull Request es una solicitud para incorporar tus cambios a la rama `develop`
   * 🐳 **VERIFICA** que el proyecto levante con Docker antes de empezar a codificar.
   * 💬 **HAZ** commits pequeños y frecuentes con mensajes claros.
 
-<!-- end list -->
-
-```
-```

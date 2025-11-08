@@ -1,7 +1,11 @@
 package com.losmergeconflicts.hotelpremier.service;
 
+import java.util.List;
+
 import com.losmergeconflicts.hotelpremier.dto.HuespedDTORequest;
 import com.losmergeconflicts.hotelpremier.dto.HuespedDTOResponse;
+import com.losmergeconflicts.hotelpremier.dto.LocalidadDTO;
+import com.losmergeconflicts.hotelpremier.dto.NacionalidadDTO;
 import com.losmergeconflicts.hotelpremier.entity.TipoDocumento;
 
 /**
@@ -28,5 +32,19 @@ public interface GestorPersonas {
      * @return true si el tipo y documento existen, false si no
      */
     boolean existeDocumento(TipoDocumento tipoDocumento, String documento);
+
+    /**
+     * Obtiene todas las localidades disponibles en el sistema.
+     * 
+     * @return lista de DTOs con todas las localidades (incluye provincia y país anidados)
+     */
+    List<LocalidadDTO> listarLocalidades();
+
+    /**
+     * Obtiene todas las nacionalidades disponibles en el sistema.
+     * 
+     * @return lista de DTOs con todas las nacionalidades
+     */
+    List<NacionalidadDTO> listarNacionalidades();
 
 }

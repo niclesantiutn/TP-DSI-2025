@@ -1,5 +1,8 @@
 package com.losmergeconflicts.hotelpremier.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,12 +13,16 @@ import com.losmergeconflicts.hotelpremier.dao.LocalidadDAO;
 import com.losmergeconflicts.hotelpremier.dao.NacionalidadDAO;
 import com.losmergeconflicts.hotelpremier.dto.HuespedDTORequest;
 import com.losmergeconflicts.hotelpremier.dto.HuespedDTOResponse;
+import com.losmergeconflicts.hotelpremier.dto.LocalidadDTO;
+import com.losmergeconflicts.hotelpremier.dto.NacionalidadDTO;
 import com.losmergeconflicts.hotelpremier.entity.Direccion;
 import com.losmergeconflicts.hotelpremier.entity.Huesped;
 import com.losmergeconflicts.hotelpremier.entity.Localidad;
 import com.losmergeconflicts.hotelpremier.entity.Nacionalidad;
 import com.losmergeconflicts.hotelpremier.entity.TipoDocumento;
 import com.losmergeconflicts.hotelpremier.mapper.HuespedMapper;
+import com.losmergeconflicts.hotelpremier.mapper.LocalidadMapper;
+import com.losmergeconflicts.hotelpremier.mapper.NacionalidadMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +43,8 @@ public class GestorPersonasImp implements GestorPersonas {
     private final DireccionDAO direccionDAO;
     private final LocalidadDAO localidadDAO;
     private final NacionalidadDAO nacionalidadDAO;
+    private final LocalidadMapper localidadMapper;
+    private final NacionalidadMapper nacionalidadMapper;
 
     /**
      * Constructor con inyección de dependencias.
@@ -45,18 +54,24 @@ public class GestorPersonasImp implements GestorPersonas {
      * @param direccionDAO DAO para operaciones con Direccion
      * @param localidadDAO DAO para operaciones con Localidad
      * @param nacionalidadDAO DAO para operaciones con Nacionalidad
+     * @param localidadMapper mapper para conversión de Localidad a DTO
+     * @param nacionalidadMapper mapper para conversión de Nacionalidad a DTO
      */
     @Autowired
     public GestorPersonasImp(HuespedDAO huespedDAO, 
                             HuespedMapper huespedMapper,
                             DireccionDAO direccionDAO,
                             LocalidadDAO localidadDAO,
-                            NacionalidadDAO nacionalidadDAO) {
+                            NacionalidadDAO nacionalidadDAO,
+                            LocalidadMapper localidadMapper,
+                            NacionalidadMapper nacionalidadMapper) {
         this.huespedDAO = huespedDAO;
         this.huespedMapper = huespedMapper;
         this.direccionDAO = direccionDAO;
         this.localidadDAO = localidadDAO;
         this.nacionalidadDAO = nacionalidadDAO;
+        this.localidadMapper = localidadMapper;
+        this.nacionalidadMapper = nacionalidadMapper;
     }
 
     /**
@@ -160,5 +175,43 @@ public class GestorPersonasImp implements GestorPersonas {
     @Transactional(readOnly = true)
     public boolean existeDocumento(TipoDocumento tipoDocumento, String documento) {
         return huespedDAO.existsByTipoDocumentoAndDocumento(tipoDocumento, documento);
+    }
+
+    /**
+     * Obtiene todas las localidades disponibles en el sistema.
+     * 
+     * @return lista de DTOs con todas las localidades (incluye provincia y país anidados)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<LocalidadDTO> listarLocalidades() {
+        log.info("Listando todas las localidades");
+        
+        List<Localidad> localidades = localidadDAO.findAll();
+        
+        log.debug("Se encontraron {} localidades", localidades.size());
+        
+        return localidades.stream()
+                .map(localidadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todas las nacionalidades disponibles en el sistema.
+     * 
+     * @return lista de DTOs con todas las nacionalidades
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<NacionalidadDTO> listarNacionalidades() {
+        log.info("Listando todas las nacionalidades");
+        
+        List<Nacionalidad> nacionalidades = nacionalidadDAO.findAll();
+        
+        log.debug("Se encontraron {} nacionalidades", nacionalidades.size());
+        
+        return nacionalidades.stream()
+                .map(nacionalidadMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

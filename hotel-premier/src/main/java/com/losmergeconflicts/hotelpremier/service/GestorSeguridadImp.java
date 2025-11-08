@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementación del servicio de autenticación.
+ * Implementación del servicio de seguridad.
  * 
  * Esta clase contiene toda la lógica de negocio relacionada con
  * registro y autenticación de usuarios.
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-public class AuthServiceImpl implements AuthService {
+public class GestorSeguridadImp implements GestorSeguridad {
 
     private final ConserjeDAO conserjeDAO;
     private final PasswordEncoder passwordEncoder;
@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
      * @param conserjeMapper mapper para conversión entre DTOs y entidades
      */
     @Autowired
-    public AuthServiceImpl(ConserjeDAO conserjeDAO, 
+    public GestorSeguridadImp(ConserjeDAO conserjeDAO, 
                           PasswordEncoder passwordEncoder,
                           ConserjeMapper conserjeMapper) {
         this.conserjeDAO = conserjeDAO;

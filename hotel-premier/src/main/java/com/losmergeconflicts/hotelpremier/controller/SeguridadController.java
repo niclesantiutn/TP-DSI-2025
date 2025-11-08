@@ -2,7 +2,7 @@ package com.losmergeconflicts.hotelpremier.controller;
 
 import com.losmergeconflicts.hotelpremier.dto.ConserjeDTORequest;
 import com.losmergeconflicts.hotelpremier.dto.ConserjeDTOResponse;
-import com.losmergeconflicts.hotelpremier.service.AuthService;
+import com.losmergeconflicts.hotelpremier.service.GestorSeguridad;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,18 +27,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @Slf4j
 @Tag(name = "Autenticación", description = "Endpoints para registro y autenticación de usuarios")
-public class AuthController {
+public class SeguridadController {
 
-    private final AuthService authService;
+    private final GestorSeguridad gestorSeguridad;
 
     /**
      * Constructor con inyección de dependencias.
      * 
-     * @param authService servicio que contiene la lógica de autenticación
+     * @param gestorSeguridad servicio que contiene la lógica de autenticación
      */
     @Autowired
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    public SeguridadController(GestorSeguridad gestorSeguridad) {
+        this.gestorSeguridad = gestorSeguridad;
     }
 
     /**
@@ -77,7 +77,7 @@ public class AuthController {
             log.debug("Procesando petición de registro para: {}", request.username());
             
             // Delegar al servicio (validaciones y mapeo dentro del servicio)
-            ConserjeDTOResponse response = authService.registrarConserje(request);
+            ConserjeDTOResponse response = gestorSeguridad.registrarConserje(request);
             
             // Mensaje de éxito
             redirectAttributes.addFlashAttribute("success", 

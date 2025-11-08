@@ -11,8 +11,7 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 public record HuespedDTORequest(
-    @Size(max = 10, message = "El CUIT no puede exceder los 10 caracteres")
-    @NotBlank(message = "El CUIT no puede estar vacío")
+    @Size(max = 11, message = "El CUIT no puede exceder los 11 caracteres")
     String cuit,
     @Size(max = 30, message = "El teléfono no puede exceder los 30 caracteres")
     @NotBlank(message = "El teléfono no puede estar vacío")
@@ -27,10 +26,8 @@ public record HuespedDTORequest(
     @NotBlank(message = "El número no puede estar vacío")
     String numero,
     @Size(max = 10, message = "El piso no puede exceder los 10 caracteres")
-    @NotBlank(message = "El piso no puede estar vacío")
     String piso,
     @Size(max = 10, message = "El departamento no puede exceder los 10 caracteres")
-    @NotBlank(message = "El departamento no puede estar vacío")
     String departamento,
     @Size(max = 10, message = "El código postal no puede exceder los 10 caracteres")
     @NotBlank(message = "El código postal no puede estar vacío")

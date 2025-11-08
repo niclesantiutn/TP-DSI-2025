@@ -97,11 +97,18 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            width: 100%;
+            font-family: inherit;
         }
         
         .menu-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .menu-card:active {
+            transform: translateY(-3px);
         }
         
         .menu-card-icon {
@@ -112,6 +119,7 @@
         .menu-card h3 {
             color: #333;
             margin-bottom: 10px;
+            font-size: 20px;
         }
         
         .menu-card p {
@@ -145,41 +153,29 @@
         
         <!-- Grid de opciones del menú -->
         <div class="menu-grid">
-            <div class="menu-card">
+            <button class="menu-card" onclick="window.location.href='/huesped/alta'">
+                <div class="menu-card-icon">👤➕</div>
+                <h3>Alta Huésped</h3>
+                <p>Registrar un nuevo huésped en el sistema</p>
+            </button>
+            
+            <button class="menu-card" onclick="return false;">
+                <div class="menu-card-icon">👤🔍</div>
+                <h3>Buscar Huésped</h3>
+                <p>Buscar información de huéspedes</p>
+            </button>
+            
+            <button class="menu-card" onclick="return false;">
+                <div class="menu-card-icon">📅</div>
+                <h3>Reservar Habitación</h3>
+                <p>Crear nueva reserva de habitación</p>
+            </button>
+            
+            <button class="menu-card" onclick="return false;">
                 <div class="menu-card-icon">🔑</div>
-                <h3>Check-in</h3>
-                <p>Registrar ingreso de huéspedes</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">🚪</div>
-                <h3>Check-out</h3>
-                <p>Registrar salida de huéspedes</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">📋</div>
-                <h3>Reservas</h3>
-                <p>Gestionar reservaciones</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">🏢</div>
-                <h3>Habitaciones</h3>
-                <p>Administrar habitaciones</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">👥</div>
-                <h3>Huéspedes</h3>
-                <p>Directorio de huéspedes</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">📊</div>
-                <h3>Reportes</h3>
-                <p>Ver estadísticas y reportes</p>
-            </div>
+                <h3>Ocupar Habitación</h3>
+                <p>Check-in de huésped a habitación</p>
+            </button>
         </div>
     </div>
 </body>

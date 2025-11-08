@@ -10,23 +10,23 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controlador para gestionar peticiones HTTP de autenticación y registro.
+ * 
+ * Este controlador maneja la lógica de negocio de autenticación.
+ * Para las vistas/interfaces, ver UIController.
  * 
  * @Controller: Indica que es un controlador MVC (retorna vistas)
  * @Slf4j: Genera logger automático para la clase
  */
 @Controller
 @Slf4j
-@Tag(name = "Autenticación", description = "Endpoints para registro, login y autenticación de usuarios")
+@Tag(name = "Autenticación", description = "Endpoints para registro y autenticación de usuarios")
 public class AuthController {
 
     private final AuthService authService;
@@ -102,78 +102,4 @@ public class AuthController {
         }
     }
 
-    /*
-     * ===========================================
-     * Endpoints para mostrar formularios y vistas
-     * ===========================================
-     */
-
-    /**
-     * Muestra el formulario de registro.
-     * 
-     * @param model modelo para pasar datos a la vista
-     * @return nombre de la vista de registro
-     */
-    @Operation(summary = "Mostrar formulario de registro",
-                description = "Renderiza la página HTML con el formulario de registro de nuevos usuarios.",
-                responses = {
-                    @ApiResponse(responseCode = "200", description = "Formulario de registro mostrado exitosamente")
-                })
-    @GetMapping("/registro")
-    public String mostrarFormularioRegistro(Model model) {
-        log.debug("Mostrando formulario de registro");
-        // Agregar un DTO vacío al modelo para el binding del formulario
-        model.addAttribute("conserjeDTORequest", new ConserjeDTORequest("", ""));
-        return "registro";
-    }
-
-    /**
-     * Endpoint para mostrar el menú principal después del login.
-     * Este es el destino configurado en SecurityConfig después de un login exitoso.
-     * 
-     * @return nombre de la vista del menú principal
-     */
-    @Operation(summary = "Mostrar menú principal",
-                description = "Renderiza el dashboard principal del sistema. Requiere autenticación.",
-                responses = {
-                    @ApiResponse(responseCode = "200", description = "Menú principal mostrado exitosamente"),
-                    @ApiResponse(responseCode = "401", description = "No autenticado - Redirige al login")
-                })
-    @GetMapping("/menu-principal")
-    public String menuPrincipal() {
-        log.debug("Usuario accedió al menú principal");
-        return "menu-principal";
-    }
-    
-    /**
-     * Muestra el formulario de login personalizado.
-     * 
-     * @param error indica si hubo un error en el login anterior
-     * @param logout indica si el usuario acaba de hacer logout
-     * @param model modelo para pasar datos a la vista
-     * @return nombre de la vista de login
-     */
-    @Operation(summary = "Mostrar formulario de login",
-                description = "Renderiza la página HTML con el formulario de inicio de sesión.",
-                responses = {
-                    @ApiResponse(responseCode = "200", description = "Formulario de login mostrado exitosamente")
-                })
-    @GetMapping("/login")
-    public String mostrarFormularioLogin(
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "logout", required = false) String logout,
-            Model model) {
-        
-        if (error != null) {
-            model.addAttribute("error", "Usuario o contraseña incorrectos");
-            log.debug("Mostrando login con mensaje de error");
-        }
-        
-        if (logout != null) {
-            model.addAttribute("success", "Has cerrado sesión correctamente");
-            log.debug("Mostrando login con mensaje de logout");
-        }
-        
-        return "login";
-    }
 }

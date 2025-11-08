@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Huésped - Hotel Premier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 920px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            position: relative;
+        }
+        
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 25px 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-grid-full {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .required::after {
+            content: " (*)";
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 7px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input[type="date"] {
+            font-family: inherit;
+        }
+        
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 35px;
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: 2fr 0.5fr 0.4fr 0.4fr 0.6fr;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .address-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>REGISTRO DE HUÉSPED</h2>
+            </div>
+            
+            <form class="modal-body">
+                <!-- Fila 1: Apellido, Nombres, Fecha de Nacimiento -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="required">APELLIDO</label>
+                        <input type="text" name="apellido" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">NOMBRES</label>
+                        <input type="text" name="nombres" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">FECHA DE NACIMIENTO</label>
+                        <input type="date" name="fechaNacimiento" placeholder="dd/mm/aaaa" required>
+                    </div>
+                </div>
+                
+                <!-- Fila 2: Tipo Documento, Número Documento, Nacionalidad -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="required">TIPO DOCUMENTO</label>
+                        <select name="tipoDocumento" required>
+                            <option value="">Seleccionar</option>
+                            <option value="DNI">DNI</option>
+                            <option value="LE">LE</option>
+                            <option value="LC">LC</option>
+                            <option value="PASAPORTE">PASAPORTE</option>
+                            <option value="OTRO">OTRO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">NÚMERO DOCUMENTO</label>
+                        <input type="text" name="numeroDocumento" maxlength="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">NACIONALIDAD</label>
+                        <select name="nacionalidad" required>
+                            <option value="">Seleccionar</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Fila 3: País, Provincia, Localidad -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="required">PAÍS</label>
+                        <select name="pais" required>
+                            <option value="">Seleccionar</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">PROVINCIA</label>
+                        <select name="provincia" required disabled>
+                            <option value="">Seleccionar</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">LOCALIDAD</label>
+                        <select name="localidad" required disabled>
+                            <option value="">Seleccionar</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Fila 4: Dirección (Calle, Número, Dpto, Piso, Código Postal) -->
+                <div class="address-grid">
+                    <div class="form-group">
+                        <label class="required">CALLE</label>
+                        <input type="text" name="calle" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">NÚMERO</label>
+                        <input type="text" name="numero" maxlength="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>DPTO.</label>
+                        <input type="text" name="departamento" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>PISO</label>
+                        <input type="text" name="piso" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">CÓDIGO POSTAL</label>
+                        <input type="text" name="codigoPostal" maxlength="10" required>
+                    </div>
+                </div>
+                
+                <!-- Fila 5: Teléfono, Email, Ocupación -->
+                <div class="contact-grid">
+                    <div class="form-group">
+                        <label class="required">TELÉFONO</label>
+                        <input type="tel" name="telefono" maxlength="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>EMAIL</label>
+                        <input type="email" name="email" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">OCUPACIÓN</label>
+                        <input type="text" name="ocupacion" maxlength="100" required>
+                    </div>
+                </div>
+                
+                <!-- Fila 6: Posición Frente al IVA, CUIT -->
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="required">POSICIÓN FRENTE AL IVA</label>
+                        <select name="posicionIVA" required>
+                            <option value="">Seleccionar</option>
+                            <option value="RESPONSABLE_INSCRIPTO">Responsable Inscripto</option>
+                            <option value="MONOTRIBUTISTA">Monotributista</option>
+                            <option value="CONSUMIDOR_FINAL">Consumidor Final</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>CUIT</label>
+                        <input type="text" name="cuit" maxlength="11" placeholder="XXXXXXXXXXX">
+                    </div>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnSiguiente">SIGUIENTE</button>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales para almacenar los datos
+        let localidades = [];
+        let nacionalidades = [];
+        let paises = new Map();
+        let provincias = new Map();
+
+        // Cargar datos al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarNacionalidades();
+            cargarLocalidades();
+        });
+
+        /**
+         * Carga las nacionalidades desde la API
+         */
+        async function cargarNacionalidades() {
+            try {
+                const response = await fetch('/api/personas/nacionalidades');
+                if (!response.ok) {
+                    throw new Error('Error al cargar nacionalidades');
+                }
+                
+                nacionalidades = await response.json();
+                console.log('Nacionalidades cargadas:', nacionalidades);
+                
+                // Rellenar el select de nacionalidades
+                const selectNacionalidad = document.querySelector('select[name="nacionalidad"]');
+                selectNacionalidad.innerHTML = '<option value="">Seleccionar</option>';
+                
+                nacionalidades.forEach(nacionalidad => {
+                    const option = document.createElement('option');
+                    option.value = nacionalidad.id;
+                    option.textContent = nacionalidad.nombre;
+                    option.dataset.nacionalidadId = nacionalidad.id;
+                    selectNacionalidad.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error al cargar nacionalidades:', error);
+                alert('Error al cargar las nacionalidades. Por favor, recargue la página.');
+            }
+        }
+
+        /**
+         * Carga las localidades desde la API y extrae países y provincias
+         */
+        async function cargarLocalidades() {
+            try {
+                const response = await fetch('/api/personas/localidades');
+                if (!response.ok) {
+                    throw new Error('Error al cargar localidades');
+                }
+                
+                localidades = await response.json();
+                console.log('Localidades cargadas:', localidades);
+                
+                // Extraer países únicos
+                localidades.forEach(localidad => {
+                    const pais = localidad.provincia.pais;
+                    if (!paises.has(pais.id)) {
+                        paises.set(pais.id, pais);
+                    }
+                    
+                    // Extraer provincias únicas
+                    const provincia = localidad.provincia;
+                    if (!provincias.has(provincia.id)) {
+                        provincias.set(provincia.id, provincia);
+                    }
+                });
+                
+                // Rellenar el select de países
+                cargarPaises();
+                
+            } catch (error) {
+                console.error('Error al cargar localidades:', error);
+                alert('Error al cargar las localidades. Por favor, recargue la página.');
+            }
+        }
+
+        /**
+         * Rellena el select de países
+         */
+        function cargarPaises() {
+            const selectPais = document.querySelector('select[name="pais"]');
+            selectPais.innerHTML = '<option value="">Seleccionar</option>';
+            
+            // Ordenar países alfabéticamente
+            const paisesArray = Array.from(paises.values()).sort((a, b) => 
+                a.nombre.localeCompare(b.nombre)
+            );
+            
+            paisesArray.forEach(pais => {
+                const option = document.createElement('option');
+                option.value = pais.id;
+                option.textContent = pais.nombre;
+                option.dataset.paisId = pais.id;
+                selectPais.appendChild(option);
+            });
+        }
+
+        /**
+         * Filtra y carga las provincias según el país seleccionado
+         */
+        function cargarProvinciasPorPais(paisId) {
+            const selectProvincia = document.querySelector('select[name="provincia"]');
+            selectProvincia.innerHTML = '<option value="">Seleccionar</option>';
+            selectProvincia.disabled = !paisId;
+            
+            // Limpiar localidades
+            const selectLocalidad = document.querySelector('select[name="localidad"]');
+            selectLocalidad.innerHTML = '<option value="">Seleccionar</option>';
+            selectLocalidad.disabled = true;
+            
+            if (!paisId) return;
+            
+            // Filtrar provincias del país seleccionado
+            const provinciasDelPais = Array.from(provincias.values())
+                .filter(provincia => provincia.pais.id == paisId)
+                .sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            provinciasDelPais.forEach(provincia => {
+                const option = document.createElement('option');
+                option.value = provincia.id;
+                option.textContent = provincia.nombre;
+                option.dataset.provinciaId = provincia.id;
+                selectProvincia.appendChild(option);
+            });
+        }
+
+        /**
+         * Filtra y carga las localidades según la provincia seleccionada
+         */
+        function cargarLocalidadesPorProvincia(provinciaId) {
+            const selectLocalidad = document.querySelector('select[name="localidad"]');
+            selectLocalidad.innerHTML = '<option value="">Seleccionar</option>';
+            selectLocalidad.disabled = !provinciaId;
+            
+            if (!provinciaId) return;
+            
+            // Filtrar localidades de la provincia seleccionada
+            const localidadesDeProvincia = localidades
+                .filter(localidad => localidad.provincia.id == provinciaId)
+                .sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            localidadesDeProvincia.forEach(localidad => {
+                const option = document.createElement('option');
+                option.value = localidad.id;
+                option.textContent = localidad.nombre;
+                option.dataset.localidadId = localidad.id;
+                selectLocalidad.appendChild(option);
+            });
+        }
+
+        // Event listeners para los selects en cascada
+        document.querySelector('select[name="pais"]').addEventListener('change', function() {
+            cargarProvinciasPorPais(this.value);
+        });
+
+        document.querySelector('select[name="provincia"]').addEventListener('change', function() {
+            cargarLocalidadesPorProvincia(this.value);
+        });
+
+        /**
+         * Valida y envía el formulario de registro de huésped
+         */
+        async function registrarHuesped() {
+            try {
+                // Obtener el formulario
+                const form = document.querySelector('.modal-body');
+                
+                // Validar el formulario HTML5
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                // Capturar los datos del formulario
+                const formData = {
+                    apellido: form.querySelector('input[name="apellido"]').value,
+                    nombre: form.querySelector('input[name="nombres"]').value,
+                    fechaNacimiento: form.querySelector('input[name="fechaNacimiento"]').value,
+                    tipoDocumento: form.querySelector('select[name="tipoDocumento"]').value,
+                    documento: form.querySelector('input[name="numeroDocumento"]').value,
+                    nacionalidadId: parseInt(form.querySelector('select[name="nacionalidad"]').value),
+                    localidadId: parseInt(form.querySelector('select[name="localidad"]').value),
+                    calle: form.querySelector('input[name="calle"]').value,
+                    numero: form.querySelector('input[name="numero"]').value,
+                    departamento: form.querySelector('input[name="departamento"]').value || null,
+                    piso: form.querySelector('input[name="piso"]').value || null,
+                    codigoPostal: form.querySelector('input[name="codigoPostal"]').value,
+                    telefono: form.querySelector('input[name="telefono"]').value,
+                    email: form.querySelector('input[name="email"]').value || null,
+                    ocupacion: form.querySelector('input[name="ocupacion"]').value,
+                    posicionFrenteAlIVA: form.querySelector('select[name="posicionIVA"]').value,
+                    cuit: form.querySelector('input[name="cuit"]').value || null,
+                    info: form.querySelector('input[name="ocupacion"]').value // Usando ocupación como info
+                };
+
+                console.log('Datos del formulario:', formData);
+
+                // Deshabilitar el botón mientras se procesa
+                const btnSiguiente = document.getElementById('btnSiguiente');
+                btnSiguiente.disabled = true;
+                btnSiguiente.textContent = 'PROCESANDO...';
+
+                // Enviar al endpoint
+                const response = await fetch('/api/personas/huesped/alta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al registrar el huésped');
+                }
+
+                const resultado = await response.json();
+                console.log('Huésped registrado exitosamente:', resultado);
+                
+                // Mostrar mensaje de éxito
+                alert('¡Huésped registrado exitosamente!');
+                
+                // Redirigir o limpiar el formulario
+                window.location.href = '/menu-principal';
+
+            } catch (error) {
+                console.error('Error al registrar huésped:', error);
+                alert('Error al registrar el huésped: ' + error.message);
+                
+                // Rehabilitar el botón
+                const btnSiguiente = document.getElementById('btnSiguiente');
+                btnSiguiente.disabled = false;
+                btnSiguiente.textContent = 'SIGUIENTE';
+            }
+        }
+
+        // Event listener para el botón SIGUIENTE
+        document.getElementById('btnSiguiente').addEventListener('click', registrarHuesped);
+    </script>
+</body>
+</html>

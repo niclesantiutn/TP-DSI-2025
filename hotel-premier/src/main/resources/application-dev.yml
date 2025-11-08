@@ -21,6 +21,13 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  # Ejecutar data.sql después de que Hibernate cree/valide el esquema
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      continue-on-error: false
+
   # Configuración de Spring Security (solo para desarrollo)
   security:
     user:

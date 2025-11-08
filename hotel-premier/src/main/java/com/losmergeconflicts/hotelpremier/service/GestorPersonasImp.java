@@ -1,0 +1,164 @@
+package com.losmergeconflicts.hotelpremier.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.losmergeconflicts.hotelpremier.dao.DireccionDAO;
+import com.losmergeconflicts.hotelpremier.dao.HuespedDAO;
+import com.losmergeconflicts.hotelpremier.dao.LocalidadDAO;
+import com.losmergeconflicts.hotelpremier.dao.NacionalidadDAO;
+import com.losmergeconflicts.hotelpremier.dto.HuespedDTORequest;
+import com.losmergeconflicts.hotelpremier.dto.HuespedDTOResponse;
+import com.losmergeconflicts.hotelpremier.entity.Direccion;
+import com.losmergeconflicts.hotelpremier.entity.Huesped;
+import com.losmergeconflicts.hotelpremier.entity.Localidad;
+import com.losmergeconflicts.hotelpremier.entity.Nacionalidad;
+import com.losmergeconflicts.hotelpremier.entity.TipoDocumento;
+import com.losmergeconflicts.hotelpremier.mapper.HuespedMapper;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Implementación del servicio de personas.
+ * 
+ * Esta clase contiene toda la lógica de negocio relacionada con
+ * la gestión de personas.
+ * 
+ * @Slf4j: Genera automáticamente un logger para la clase
+ */
+@Service
+@Slf4j
+public class GestorPersonasImp implements GestorPersonas {
+    
+    private final HuespedDAO huespedDAO;
+    private final HuespedMapper huespedMapper;
+    private final DireccionDAO direccionDAO;
+    private final LocalidadDAO localidadDAO;
+    private final NacionalidadDAO nacionalidadDAO;
+
+    /**
+     * Constructor con inyección de dependencias.
+     * 
+     * @param huespedDAO DAO para operaciones con Huesped
+     * @param huespedMapper mapper para conversión entre DTOs y entidades
+     * @param direccionDAO DAO para operaciones con Direccion
+     * @param localidadDAO DAO para operaciones con Localidad
+     * @param nacionalidadDAO DAO para operaciones con Nacionalidad
+     */
+    @Autowired
+    public GestorPersonasImp(HuespedDAO huespedDAO, 
+                            HuespedMapper huespedMapper,
+                            DireccionDAO direccionDAO,
+                            LocalidadDAO localidadDAO,
+                            NacionalidadDAO nacionalidadDAO) {
+        this.huespedDAO = huespedDAO;
+        this.huespedMapper = huespedMapper;
+        this.direccionDAO = direccionDAO;
+        this.localidadDAO = localidadDAO;
+        this.nacionalidadDAO = nacionalidadDAO;
+    }
+
+    /**
+     * Registra un nuevo huésped en el sistema.
+     * 
+     * Proceso:
+     * 1. Valida que el documento no exista
+     * 2. Busca y valida las entidades relacionadas (Localidad, Nacionalidad)
+     * 3. Crea y guarda la Direccion
+     * 4. Convierte el DTO a entidad usando el mapper
+     * 5. Asigna las entidades relacionadas
+     * 6. Guarda el huésped en base de datos
+     * 7. Convierte la entidad guardada a DTO de respuesta
+     * 
+     * @param request DTO con los datos del huésped (ya validados por @Valid)
+     * @return DTO de respuesta con los datos del huésped registrado
+     * @throws IllegalArgumentException si el documento ya existe o si no se encuentran las entidades relacionadas
+     */
+    @Override
+    @Transactional
+    public HuespedDTOResponse altaHuesped(HuespedDTORequest request) {
+
+        // Validar que los datos no sean nulos
+        if (request == null) {
+            log.error("El request de alta de huésped es nulo");
+            throw new IllegalArgumentException("Los datos del huésped no pueden ser nulos");
+        }
+
+        log.info("Intentando dar de alta nuevo huésped con documento: {} {}", 
+                request.tipoDocumento(), request.documento());
+
+        // Validar que la combinación de tipo de documento y documento no exista
+        if (huespedDAO.existsByTipoDocumentoAndDocumento(request.tipoDocumento(), request.documento())) {
+            log.warn("Intento de alta con tipo y número de documento existentes: {} {}", 
+                    request.tipoDocumento(), request.documento());
+            throw new IllegalArgumentException(
+                "¡CUIDADO! El tipo y número de documento ya existen en el sistema.");
+        }
+        
+        try {
+            // 1. Buscar y validar Nacionalidad
+            Nacionalidad nacionalidad = nacionalidadDAO.findById(request.nacionalidadId())
+                .orElseThrow(() -> {
+                    log.error("Nacionalidad no encontrada con ID: {}", request.nacionalidadId());
+                    return new IllegalArgumentException("La nacionalidad especificada no existe");
+                });
+
+            // 2. Buscar y validar Localidad
+            Localidad localidad = localidadDAO.findById(request.localidadId())
+                .orElseThrow(() -> {
+                    log.error("Localidad no encontrada con ID: {}", request.localidadId());
+                    return new IllegalArgumentException("La localidad especificada no existe");
+                });
+            
+            // 3. Crear y guardar Direccion
+            Direccion direccion = Direccion.builder()
+                .calle(request.calle())
+                .numero(request.numero())
+                .piso(request.piso())
+                .departamento(request.departamento())
+                .codigoPostal(request.codigoPostal())
+                .localidad(localidad)
+                .build();
+            
+            Direccion direccionGuardada = direccionDAO.save(direccion);
+            log.debug("Dirección guardada con ID: {}", direccionGuardada.getId());
+            
+            // 4. Convertir DTO a entidad usando MapStruct
+            Huesped nuevoHuesped = huespedMapper.toEntity(request);
+            
+            // 5. Asignar las entidades relacionadas
+            nuevoHuesped.setDireccion(direccionGuardada);
+            nuevoHuesped.setNacionalidad(nacionalidad);
+            
+            // 6. Guardar en base de datos
+            Huesped huespedGuardado = huespedDAO.save(nuevoHuesped);
+            
+            log.info("Huésped dado de alta exitosamente con ID: {} - Documento: {}", 
+                    huespedGuardado.getId(), request.documento());
+            
+            // 7. Convertir entidad guardada a DTO de respuesta
+            return huespedMapper.toResponse(huespedGuardado);
+            
+        } catch (IllegalArgumentException e) {
+            // Re-lanzar excepciones de validación
+            throw e;
+        } catch (Exception e) {
+            log.error("Error al dar de alta huésped con documento: {}", request.documento(), e);
+            throw new RuntimeException("Error al procesar el alta del huésped", e);
+        }
+    }
+
+    /**
+     * Verifica si un tipo y número de documento ya están registrados.
+     * 
+     * @param tipoDocumento tipo de documento (DNI, PASAPORTE, etc.)
+     * @param documento número de documento a verificar
+     * @return true si el tipo y documento existen, false si no
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existeDocumento(TipoDocumento tipoDocumento, String documento) {
+        return huespedDAO.existsByTipoDocumentoAndDocumento(tipoDocumento, documento);
+    }
+}

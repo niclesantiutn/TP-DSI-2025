@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,6 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor  // Genera constructor sin argumentos (requerido por JPA)
 @AllArgsConstructor  // Genera constructor con todos los argumentos
-@Builder  // Implementa el patrón Builder para construcción fluida de objetos
 @EqualsAndHashCode(callSuper = true)  // Incluye los campos de Persona en equals/hashCode
 @ToString(callSuper = true)  // Incluye los campos de Persona en toString
 public class Huesped extends Persona {

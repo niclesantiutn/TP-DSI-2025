@@ -4,11 +4,11 @@ import com.losmergeconflicts.hotelpremier.dto.ConserjeDTORequest;
 import com.losmergeconflicts.hotelpremier.dto.ConserjeDTOResponse;
 
 /**
- * Interfaz del servicio de autenticación.
+ * Interfaz del servicio de seguridad.
  * 
  * Define los métodos relacionados con autenticación y registro de usuarios.
  */
-public interface AuthService {
+public interface GestorSeguridad {
     
     /**
      * Registra un nuevo conserje en el sistema.

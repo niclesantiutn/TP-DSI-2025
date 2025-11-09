@@ -19,13 +19,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 
 /**
- * Tests unitarios para AuthServiceImpl.
+ * Tests unitarios para GestorSeguridadImp.
  * 
  * Probamos la lógica de negocio de autenticación en aislamiento,
  * usando Mockito para simular las dependencias (DAO, Mapper, PasswordEncoder).
  */
 @ExtendWith(MockitoExtension.class)
-class AuthServiceImplTest {
+class GestorSeguridadImpTest {
 
     @Mock
     private ConserjeDAO conserjeDAO;
@@ -37,7 +37,7 @@ class AuthServiceImplTest {
     private ConserjeMapper conserjeMapper;
 
     @InjectMocks
-    private AuthServiceImpl authService;
+    private GestorSeguridadImp gestorSeguridad;
 
     private ConserjeDTORequest validRequest;
     private Conserje conserjeEntity;
@@ -104,7 +104,7 @@ class AuthServiceImplTest {
         
         // --- ACT ---
         
-        ConserjeDTOResponse resultado = authService.registrarConserje(validRequest);
+        ConserjeDTOResponse resultado = gestorSeguridad.registrarConserje(validRequest);
         
         // --- ASSERT ---
         
@@ -148,7 +148,7 @@ class AuthServiceImplTest {
         
         // Verificamos que se lanza la excepción esperada
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            authService.registrarConserje(validRequest);
+            gestorSeguridad.registrarConserje(validRequest);
         });
         
         // Verificamos el mensaje de error
@@ -198,7 +198,7 @@ class AuthServiceImplTest {
         // --- ACT & ASSERT ---
         
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authService.registrarConserje(validRequest);
+            gestorSeguridad.registrarConserje(validRequest);
         });
         
         // Verificamos el mensaje
@@ -227,7 +227,7 @@ class AuthServiceImplTest {
         
         // --- ACT ---
         
-        boolean resultado = authService.existeUsername(username);
+        boolean resultado = gestorSeguridad.existeUsername(username);
         
         // --- ASSERT ---
         
@@ -253,7 +253,7 @@ class AuthServiceImplTest {
         
         // --- ACT ---
         
-        boolean resultado = authService.existeUsername(username);
+        boolean resultado = gestorSeguridad.existeUsername(username);
         
         // --- ASSERT ---
         
@@ -297,7 +297,7 @@ class AuthServiceImplTest {
         
         // --- ACT ---
         
-        authService.registrarConserje(validRequest);
+        gestorSeguridad.registrarConserje(validRequest);
         
         // --- ASSERT ---
         

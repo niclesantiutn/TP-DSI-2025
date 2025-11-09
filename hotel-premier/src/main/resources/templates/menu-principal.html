@@ -45,7 +45,7 @@
         
         .btn-logout {
             padding: 8px 20px;
-            background: #dc3545;
+            background: #764ba2;
             color: white;
             border: none;
             border-radius: 5px;
@@ -97,6 +97,9 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            width: 100%;
+            font-family: inherit;
         }
         
         .menu-card:hover {
@@ -104,14 +107,24 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
         
+        .menu-card:active {
+            transform: translateY(-3px);
+        }
+        
         .menu-card-icon {
             font-size: 48px;
             margin-bottom: 15px;
         }
         
+        .menu-card-icon img {
+            height: 80px;
+            width: auto;
+        }
+        
         .menu-card h3 {
             color: #333;
             margin-bottom: 10px;
+            font-size: 20px;
         }
         
         .menu-card p {
@@ -124,7 +137,8 @@
     <!-- Barra de navegación -->
     <nav class="navbar">
         <div class="navbar-brand">
-            🏨 Hotel Premier
+            <img th:src="@{/images/logo-hotel-premier.png}" alt="Hotel Premier" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+            Hotel Premier
         </div>
         <div class="navbar-user">
             <span class="user-info">
@@ -139,47 +153,43 @@
     <!-- Contenido principal -->
     <div class="container">
         <div class="welcome-section">
-            <h1>Menú Principal</h1>
-            <p>Sistema de Gestión Hotelera</p>
+            <h1>¡BIENVENIDO!</h1>
+            <p>Menú Principal Conserje</p>
         </div>
         
         <!-- Grid de opciones del menú -->
         <div class="menu-grid">
-            <div class="menu-card">
-                <div class="menu-card-icon">🔑</div>
-                <h3>Check-in</h3>
-                <p>Registrar ingreso de huéspedes</p>
-            </div>
+            <button class="menu-card" onclick="window.location.href='/huesped/alta'">
+                <div class="menu-card-icon">
+                    <img th:src="@{/images/alta-huesped.png}" alt="Alta Huésped">
+                </div>
+                <h3>Alta Huésped</h3>
+                <p>Registrar un nuevo huésped en el sistema</p>
+            </button>
             
-            <div class="menu-card">
-                <div class="menu-card-icon">🚪</div>
-                <h3>Check-out</h3>
-                <p>Registrar salida de huéspedes</p>
-            </div>
+            <button class="menu-card" onclick="return false;">
+                <div class="menu-card-icon">
+                    <img th:src="@{/images/buscar-huesped.png}" alt="Buscar Huésped">
+                </div>
+                <h3>Buscar Huésped</h3>
+                <p>Buscar información de huéspedes</p>
+            </button>
             
-            <div class="menu-card">
-                <div class="menu-card-icon">📋</div>
-                <h3>Reservas</h3>
-                <p>Gestionar reservaciones</p>
-            </div>
+            <button class="menu-card" onclick="return false;">
+                <div class="menu-card-icon">
+                    <img th:src="@{/images/reservar-habitacion.png}" alt="Reservar Habitación">
+                </div>
+                <h3>Reservar Habitación</h3>
+                <p>Crear nueva reserva de habitación</p>
+            </button>
             
-            <div class="menu-card">
-                <div class="menu-card-icon">🏢</div>
-                <h3>Habitaciones</h3>
-                <p>Administrar habitaciones</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">👥</div>
-                <h3>Huéspedes</h3>
-                <p>Directorio de huéspedes</p>
-            </div>
-            
-            <div class="menu-card">
-                <div class="menu-card-icon">📊</div>
-                <h3>Reportes</h3>
-                <p>Ver estadísticas y reportes</p>
-            </div>
+            <button class="menu-card" onclick="return false;">
+                <div class="menu-card-icon">
+                    <img th:src="@{/images/ocupar-habitacion.png}" alt="Ocupar Habitación">
+                </div>
+                <h3>Ocupar Habitación</h3>
+                <p>Check-in de huésped a habitación</p>
+            </button>
         </div>
     </div>
 </body>

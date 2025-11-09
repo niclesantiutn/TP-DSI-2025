@@ -180,6 +180,58 @@
             background: #d0d0d0;
         }
         
+        /* Estilos para el modal de confirmación */
+        .confirmation-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .confirmation-dialog.active {
+            display: flex;
+        }
+        
+        .confirmation-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .confirmation-content h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .confirmation-content p {
+            margin: 0 0 25px 0;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .confirmation-buttons .btn {
+            min-width: 100px;
+        }
+        
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -330,7 +382,19 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="btnSiguiente">SIGUIENTE</button>
-                <button type="button" class="btn btn-secondary" onclick="window.history.back()">CANCELAR</button>
+                <button type="button" class="btn btn-secondary" id="btnCancelar">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="confirmationDialog" class="confirmation-dialog">
+        <div class="confirmation-content">
+            <h3 id="confirmationTitle">Confirmación</h3>
+            <p id="confirmationMessage">¿Está seguro?</p>
+            <div class="confirmation-buttons">
+                <button type="button" class="btn btn-primary" id="btnConfirmSi">SÍ</button>
+                <button type="button" class="btn btn-secondary" id="btnConfirmNo">NO</button>
             </div>
         </div>
     </div>
@@ -558,11 +622,8 @@
                 const resultado = await response.json();
                 console.log('Huésped registrado exitosamente:', resultado);
                 
-                // Mostrar mensaje de éxito
-                alert('¡Huésped registrado exitosamente!');
-                
-                // Redirigir o limpiar el formulario
-                window.location.href = '/menu-principal';
+                // Mostrar mensaje de confirmación para cargar otro huésped
+                mostrarDialogoCargarOtro(formData.nombre, formData.apellido);
 
             } catch (error) {
                 console.error('Error al registrar huésped:', error);
@@ -575,8 +636,95 @@
             }
         }
 
+        /**
+         * Muestra el diálogo para preguntar si desea cargar otro huésped
+         */
+        function mostrarDialogoCargarOtro(nombre, apellido) {
+            const dialog = document.getElementById('confirmationDialog');
+            const title = document.getElementById('confirmationTitle');
+            const message = document.getElementById('confirmationMessage');
+            const btnSi = document.getElementById('btnConfirmSi');
+            const btnNo = document.getElementById('btnConfirmNo');
+            
+            title.textContent = '¡Registro Exitoso!';
+            message.textContent = `El huésped ${nombre} ${apellido} ha sido satisfactoriamente cargado al sistema. ¿Desea cargar otro?`;
+            
+            dialog.classList.add('active');
+            
+            // Handler para el botón SÍ
+            btnSi.onclick = function() {
+                dialog.classList.remove('active');
+                limpiarFormulario();
+                
+                // Rehabilitar el botón
+                const btnSiguiente = document.getElementById('btnSiguiente');
+                btnSiguiente.disabled = false;
+                btnSiguiente.textContent = 'SIGUIENTE';
+            };
+            
+            // Handler para el botón NO
+            btnNo.onclick = function() {
+                dialog.classList.remove('active');
+                window.location.href = '/menu-principal';
+            };
+        }
+
+        /**
+         * Limpia todos los campos del formulario
+         */
+        function limpiarFormulario() {
+            const form = document.querySelector('.modal-body');
+            
+            // Limpiar inputs de texto, date, email, tel
+            form.querySelectorAll('input[type="text"], input[type="date"], input[type="email"], input[type="tel"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset selects
+            form.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            
+            // Deshabilitar provincia y localidad
+            form.querySelector('select[name="provincia"]').disabled = true;
+            form.querySelector('select[name="localidad"]').disabled = true;
+            
+            // Enfocar el primer campo
+            form.querySelector('input[name="apellido"]').focus();
+        }
+
+        /**
+         * Muestra el diálogo de confirmación para cancelar el alta
+         */
+        function confirmarCancelacion() {
+            const dialog = document.getElementById('confirmationDialog');
+            const title = document.getElementById('confirmationTitle');
+            const message = document.getElementById('confirmationMessage');
+            const btnSi = document.getElementById('btnConfirmSi');
+            const btnNo = document.getElementById('btnConfirmNo');
+            
+            title.textContent = 'Confirmar Cancelación';
+            message.textContent = '¿Desea cancelar el alta del huésped?';
+            
+            dialog.classList.add('active');
+            
+            // Handler para el botón SÍ
+            btnSi.onclick = function() {
+                dialog.classList.remove('active');
+                window.history.back();
+            };
+            
+            // Handler para el botón NO
+            btnNo.onclick = function() {
+                dialog.classList.remove('active');
+            };
+        }
+
         // Event listener para el botón SIGUIENTE
         document.getElementById('btnSiguiente').addEventListener('click', registrarHuesped);
+        
+        // Event listener para el botón CANCELAR
+        document.getElementById('btnCancelar').addEventListener('click', confirmarCancelacion);
     </script>
 </body>
 </html>

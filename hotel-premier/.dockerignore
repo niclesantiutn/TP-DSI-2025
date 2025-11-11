@@ -1,8 +1,12 @@
-# Ignorar target y archivos compilados
-target/
+# Ignorar archivos compilados (excepto el JAR final)
+target/classes/
+target/generated-sources/
+target/generated-test-sources/
+target/maven-archiver/
+target/maven-status/
+target/test-classes/
+target/*.original
 *.class
-*.jar
-*.war
 
 # Ignorar logs
 logs/

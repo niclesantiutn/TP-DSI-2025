@@ -22,9 +22,10 @@ spring:
       ddl-auto: validate
 
   # Ejecutar data.sql después de que Hibernate cree/valide el esquema
+  # mode: never - Los datos se cargan desde init.sql en PostgreSQL la primera vez
   sql:
     init:
-      mode: always
+      mode: never
       data-locations: classpath:data.sql
       continue-on-error: false
 

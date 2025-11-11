@@ -18,7 +18,8 @@ services:
     build:
       context: ./hotel-premier
       dockerfile: Dockerfile
-      target: build
+      target: development
+    container_name: hotel-premier-dev
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/hotel_premier_dev
@@ -27,10 +28,15 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./hotel-premier/src:/app/src
+      # Montar código fuente para hot-reload
+      - ./hotel-premier/src:/app/src:ro
+      # Montar logs para persistencia
+      - ./hotel-premier/logs:/app/logs
+      # Evitar montar target para no sobrescribir compilaciones
     depends_on:
       postgres-db:
         condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_dev_data:

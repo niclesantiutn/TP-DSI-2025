@@ -1,0 +1,33 @@
+# Ignorar target y archivos compilados
+target/
+*.class
+*.jar
+*.war
+
+# Ignorar logs
+logs/
+*.log
+
+# Ignorar archivos del IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos temporales
+*.tmp
+*.temp
+*.swp
+*~
+
+# Ignorar node_modules (si hay frontend)
+node_modules/
+
+# Ignorar archivos de git
+.git/
+.gitignore

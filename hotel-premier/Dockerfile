@@ -1,4 +1,6 @@
-# Etapa 1: Build
+# ========================================
+# Etapa 1: Build (para producción)
+# ========================================
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 
 WORKDIR /app
@@ -17,8 +19,35 @@ COPY src ./src
 # Compilar la aplicación
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Runtime
-FROM eclipse-temurin:21-jre-alpine
+# ========================================
+# Etapa 2: Development (con hot-reload)
+# ========================================
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS development
+
+WORKDIR /app
+
+# Copiar archivos de configuración de Maven
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+
+# Descargar dependencias
+RUN mvn dependency:go-offline -B
+
+# Crear directorio de logs
+RUN mkdir -p /app/logs
+
+# Exponer el puerto de la aplicación
+EXPOSE 8080
+
+# El código fuente se monta como volumen en docker-compose
+# Ejecutar con Spring Boot Maven Plugin para hot-reload
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments='-Dspring.devtools.restart.enabled=true'"]
+
+# ========================================
+# Etapa 3: Runtime (para producción)
+# ========================================
+FROM eclipse-temurin:21-jre-alpine AS production
 
 WORKDIR /app
 

@@ -108,6 +108,7 @@
             font-size: 13px;
             font-family: inherit;
             background: white;
+            text-transform: uppercase;
         }
         
         .form-group input:focus,
@@ -290,7 +291,7 @@
                     </div>
                     <div class="form-group">
                         <label class="required">NÚMERO DOCUMENTO</label>
-                        <input type="text" name="numeroDocumento" maxlength="10" required>
+                        <input type="text" name="numeroDocumento" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label class="required">NACIONALIDAD</label>
@@ -330,7 +331,7 @@
                     </div>
                     <div class="form-group">
                         <label class="required">NÚMERO</label>
-                        <input type="text" name="numero" maxlength="10" required>
+                        <input type="text" name="numero" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label>DPTO.</label>
@@ -342,7 +343,7 @@
                     </div>
                     <div class="form-group">
                         <label class="required">CÓDIGO POSTAL</label>
-                        <input type="text" name="codigoPostal" maxlength="10" required>
+                        <input type="text" name="codigoPostal" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                 </div>
                 
@@ -375,7 +376,7 @@
                     </div>
                     <div class="form-group">
                         <label>CUIT</label>
-                        <input type="text" name="cuit" maxlength="11" placeholder="XXXXXXXXXXX">
+                        <input type="text" name="cuit" maxlength="11" pattern="[0-9]*" inputmode="numeric" placeholder="XXXXXXXXXXX">
                     </div>
                 </div>
             </form>
@@ -410,6 +411,55 @@
         document.addEventListener('DOMContentLoaded', function() {
             cargarNacionalidades();
             cargarLocalidades();
+            
+            // Convertir automáticamente a mayúsculas todos los inputs de texto
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.toUpperCase();
+                    this.setSelectionRange(start, end);
+                });
+            });
+            
+            // Restringir campos numéricos para que solo acepten dígitos
+            const camposNumericos = document.querySelectorAll('input[name="numeroDocumento"], input[name="numero"], input[name="codigoPostal"], input[name="cuit"]');
+            camposNumericos.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    // Permitir solo números (0-9)
+                    const charCode = e.which ? e.which : e.keyCode;
+                    if (charCode < 48 || charCode > 57) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                // Prevenir pegar texto no numérico
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    const numericText = pastedText.replace(/\D/g, ''); // Eliminar todo lo que no sea dígito
+                    
+                    // Respetar el maxlength
+                    const maxLength = this.getAttribute('maxlength');
+                    const finalText = maxLength ? numericText.substring(0, maxLength) : numericText;
+                    
+                    this.value = finalText;
+                });
+                
+                // Limpiar cualquier carácter no numérico en el input
+                input.addEventListener('input', function(e) {
+                    const start = this.selectionStart;
+                    const originalValue = this.value;
+                    this.value = this.value.replace(/\D/g, ''); // Eliminar todo lo que no sea dígito
+                    
+                    // Ajustar la posición del cursor si se eliminaron caracteres
+                    if (originalValue !== this.value) {
+                        this.setSelectionRange(start - 1, start - 1);
+                    }
+                });
+            });
         });
 
         /**

@@ -8,10 +8,12 @@ import com.losmergeconflicts.hotelpremier.entity.TipoDocumento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record HuespedDTORequest(
     @Size(max = 11, message = "El CUIT no puede exceder los 11 caracteres")
+    @Pattern(regexp = "^[0-9]*$", message = "El CUIT solo puede contener números")
     String cuit,
     @Size(max = 30, message = "El teléfono no puede exceder los 30 caracteres")
     @NotBlank(message = "El teléfono no puede estar vacío")
@@ -24,6 +26,7 @@ public record HuespedDTORequest(
     String calle,
     @Size(max = 10, message = "El número no puede exceder los 10 caracteres")
     @NotBlank(message = "El número no puede estar vacío")
+    @Pattern(regexp = "^[0-9]+$", message = "El número solo puede contener dígitos")
     String numero,
     @Size(max = 10, message = "El piso no puede exceder los 10 caracteres")
     String piso,
@@ -31,6 +34,7 @@ public record HuespedDTORequest(
     String departamento,
     @Size(max = 10, message = "El código postal no puede exceder los 10 caracteres")
     @NotBlank(message = "El código postal no puede estar vacío")
+    @Pattern(regexp = "^[0-9]+$", message = "El código postal solo puede contener dígitos")
     String codigoPostal,
     Long localidadId,
     @Size(max = 100, message = "El nombre no puede exceder los 100 caracteres")
@@ -43,6 +47,7 @@ public record HuespedDTORequest(
     TipoDocumento tipoDocumento,
     @Size(max = 10, message = "El documento no puede exceder los 10 caracteres")
     @NotBlank(message = "El documento no puede estar vacío")
+    @Pattern(regexp = "^[0-9]+$", message = "El documento solo puede contener dígitos")
     String documento,
     @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
     @NotNull(message = "La fecha de nacimiento no puede ser nula")

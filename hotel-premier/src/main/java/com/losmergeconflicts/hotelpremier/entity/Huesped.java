@@ -35,7 +35,7 @@ public class Huesped extends Persona {
     @Enumerated(EnumType.STRING)
     private TipoDocumento tipoDocumento;
 
-    @Column(nullable = false, unique = true, length = 10)
+    @Column(nullable = false, length = 10)
     private String documento;
 
     @Column(nullable = false)

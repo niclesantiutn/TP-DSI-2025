@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS huespedes (
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
     tipo_documento VARCHAR(20),
-    documento VARCHAR(10) NOT NULL UNIQUE,
+    documento VARCHAR(10) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
     email VARCHAR(100),
     ocupacion VARCHAR(100) NOT NULL,

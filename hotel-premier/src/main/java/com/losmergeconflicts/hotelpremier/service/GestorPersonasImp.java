@@ -75,16 +75,8 @@ public class GestorPersonasImp implements GestorPersonas {
     }
 
     /**
-     * Registra un nuevo huésped en el sistema.
-     * 
-     * Proceso:
-     * 1. Valida que el documento no exista
-     * 2. Busca y valida las entidades relacionadas (Localidad, Nacionalidad)
-     * 3. Crea y guarda la Direccion
-     * 4. Convierte el DTO a entidad usando el mapper
-     * 5. Asigna las entidades relacionadas
-     * 6. Guarda el huésped en base de datos
-     * 7. Convierte la entidad guardada a DTO de respuesta
+     * Registra un nuevo huésped en el sistema (sin permitir duplicados).
+     * Delega al método sobrecargado con permitirDuplicados = false.
      * 
      * @param request DTO con los datos del huésped (ya validados por @Valid)
      * @return DTO de respuesta con los datos del huésped registrado
@@ -93,6 +85,29 @@ public class GestorPersonasImp implements GestorPersonas {
     @Override
     @Transactional
     public HuespedDTOResponse altaHuesped(HuespedDTORequest request) {
+        return altaHuesped(request, false);
+    }
+
+    /**
+     * Registra un nuevo huésped en el sistema.
+     * 
+     * Proceso:
+     * 1. Valida que el documento no exista (si permitirDuplicados es false)
+     * 2. Busca y valida las entidades relacionadas (Localidad, Nacionalidad)
+     * 3. Crea y guarda la Direccion
+     * 4. Convierte el DTO a entidad usando el mapper
+     * 5. Asigna las entidades relacionadas
+     * 6. Guarda el huésped en base de datos
+     * 7. Convierte la entidad guardada a DTO de respuesta
+     * 
+     * @param request DTO con los datos del huésped (ya validados por @Valid)
+     * @param permitirDuplicados si es true, permite registrar huéspedes con tipo y documento duplicado
+     * @return DTO de respuesta con los datos del huésped registrado
+     * @throws IllegalArgumentException si el documento ya existe (y no se permite duplicados) o si no se encuentran las entidades relacionadas
+     */
+    @Override
+    @Transactional
+    public HuespedDTOResponse altaHuesped(HuespedDTORequest request, boolean permitirDuplicados) {
 
         // Validar que los datos no sean nulos
         if (request == null) {
@@ -104,7 +119,7 @@ public class GestorPersonasImp implements GestorPersonas {
                 request.tipoDocumento(), request.documento());
 
         // Validar que la combinación de tipo de documento y documento no exista
-        if (huespedDAO.existsByTipoDocumentoAndDocumento(request.tipoDocumento(), request.documento())) {
+        if (huespedDAO.existsByTipoDocumentoAndDocumento(request.tipoDocumento(), request.documento()) && !permitirDuplicados) {
             log.warn("Intento de alta con tipo y número de documento existentes: {} {}", 
                     request.tipoDocumento(), request.documento());
             throw new IllegalArgumentException(

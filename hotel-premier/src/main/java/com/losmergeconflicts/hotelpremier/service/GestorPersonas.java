@@ -25,6 +25,16 @@ public interface GestorPersonas {
     HuespedDTOResponse altaHuesped(HuespedDTORequest request);
 
     /**
+     * Dar de alta un nuevo huésped en el sistema.
+     * 
+     * @param request DTO con los datos del huésped (ya validados por @Valid)
+     * @param permitirDuplicados si es true, permite registrar huéspedes con tipo y documento duplicado
+     * @return DTO de respuesta con los datos del huésped dado de alta
+     * @throws IllegalArgumentException si no se encuentran las entidades relacionadas
+     */
+    HuespedDTOResponse altaHuesped(HuespedDTORequest request, boolean permitirDuplicados);
+
+    /**
      * Verifica si un tipo y número de documento ya están registrados.
      * 
      * @param tipoDocumento tipo de documento (DNI, PASAPORTE, etc.)

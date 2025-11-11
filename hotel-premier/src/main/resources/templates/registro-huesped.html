@@ -233,6 +233,22 @@
             min-width: 100px;
         }
         
+        /* Estilos específicos para el modal de documento duplicado */
+        .warning-dialog {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+        
+        .warning-dialog h3 {
+            color: #856404;
+        }
+        
+        .warning-dialog p {
+            color: #856404;
+            font-weight: 500;
+            white-space: pre-line;
+        }
+        
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -614,8 +630,9 @@
 
         /**
          * Valida y envía el formulario de registro de huésped
+         * @param {boolean} permitirDuplicado - Si es true, utiliza el endpoint que permite duplicados
          */
-        async function registrarHuesped() {
+        async function registrarHuesped(permitirDuplicado = false) {
             try {
                 // Obtener el formulario
                 const form = document.querySelector('.modal-body');
@@ -655,8 +672,15 @@
                 btnSiguiente.disabled = true;
                 btnSiguiente.textContent = 'PROCESANDO...';
 
+                // Elegir el endpoint según si permite duplicado
+                const endpoint = permitirDuplicado 
+                    ? '/api/personas/huesped/alta-duplicado' 
+                    : '/api/personas/huesped/alta';
+
+                console.log('Enviando a endpoint:', endpoint);
+
                 // Enviar al endpoint
-                const response = await fetch('/api/personas/huesped/alta', {
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -666,6 +690,20 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    
+                    // Si es un error de documento duplicado y NO estamos permitiendo duplicados
+                    if (!permitirDuplicado && errorData.message && 
+                        errorData.message.includes('tipo y número de documento ya existen')) {
+                        
+                        // Rehabilitar el botón
+                        btnSiguiente.disabled = false;
+                        btnSiguiente.textContent = 'SIGUIENTE';
+                        
+                        // Mostrar modal de confirmación de duplicado
+                        mostrarDialogoDocumentoDuplicado(formData.tipoDocumento, formData.documento);
+                        return;
+                    }
+                    
                     throw new Error(errorData.message || 'Error al registrar el huésped');
                 }
 
@@ -684,6 +722,60 @@
                 btnSiguiente.disabled = false;
                 btnSiguiente.textContent = 'SIGUIENTE';
             }
+        }
+
+        /**
+         * Muestra el diálogo cuando se detecta un documento duplicado
+         * @param {string} tipoDocumento - Tipo de documento (DNI, PASAPORTE, etc.)
+         * @param {string} documento - Número de documento
+         */
+        function mostrarDialogoDocumentoDuplicado(tipoDocumento, documento) {
+            const dialog = document.getElementById('confirmationDialog');
+            const content = dialog.querySelector('.confirmation-content');
+            const title = document.getElementById('confirmationTitle');
+            const message = document.getElementById('confirmationMessage');
+            const btnSi = document.getElementById('btnConfirmSi');
+            const btnNo = document.getElementById('btnConfirmNo');
+            
+            // Agregar estilos de advertencia
+            content.classList.add('warning-dialog');
+            
+            title.textContent = '¡CUIDADO!';
+            message.textContent = `El tipo y número de documento ya existen en el sistema.\n\n${tipoDocumento}: ${documento}`;
+            
+            // Cambiar texto de los botones
+            btnSi.textContent = 'ACEPTAR IGUALMENTE';
+            btnNo.textContent = 'CORREGIR';
+            
+            dialog.classList.add('active');
+            
+            // Handler para el botón ACEPTAR IGUALMENTE
+            btnSi.onclick = function() {
+                dialog.classList.remove('active');
+                content.classList.remove('warning-dialog');
+                
+                // Restaurar texto original de botones
+                btnSi.textContent = 'SÍ';
+                btnNo.textContent = 'NO';
+                
+                // Llamar a registrar con permitirDuplicado = true
+                console.log('Usuario eligió ACEPTAR IGUALMENTE - Registrando con duplicado permitido');
+                registrarHuesped(true);
+            };
+            
+            // Handler para el botón CORREGIR
+            btnNo.onclick = function() {
+                dialog.classList.remove('active');
+                content.classList.remove('warning-dialog');
+                
+                // Restaurar texto original de botones
+                btnSi.textContent = 'SÍ';
+                btnNo.textContent = 'NO';
+                
+                // Enfocar el campo de tipo de documento para facilitar la corrección
+                console.log('Usuario eligió CORREGIR - Manteniendo datos para edición');
+                document.querySelector('select[name="tipoDocumento"]').focus();
+            };
         }
 
         /**
@@ -771,7 +863,9 @@
         }
 
         // Event listener para el botón SIGUIENTE
-        document.getElementById('btnSiguiente').addEventListener('click', registrarHuesped);
+        document.getElementById('btnSiguiente').addEventListener('click', function() {
+            registrarHuesped(false);
+        });
         
         // Event listener para el botón CANCELAR
         document.getElementById('btnCancelar').addEventListener('click', confirmarCancelacion);

@@ -667,4 +667,311 @@ public class GestorPersonasImpTest {
         // Verificar que se guardó el huésped después
         verify(huespedDAO, times(1)).save(any(Huesped.class));
     }
+
+    // ============================================================================
+    // TESTS PARA altaHuesped(HuespedDTORequest request, boolean permitirDuplicados)
+    // ============================================================================
+
+    /**
+     * CAMINO FELIZ: Alta exitosa con permitirDuplicados = true y documento existente.
+     * 
+     * Escenario:
+     * - El tipo y número de documento YA existen en BD
+     * - Se llama al método con permitirDuplicados = true
+     * - Todas las entidades relacionadas existen (Nacionalidad, Localidad)
+     * - Datos válidos
+     * 
+     * Resultado esperado:
+     * - NO se lanza excepción por documento duplicado
+     * - Se crea y guarda la Dirección
+     * - Se guarda el Huésped correctamente
+     * - Se retorna DTO de respuesta con datos del huésped
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_DocumentoExistente_CaminoFeliz() {
+        // --- ARRANGE ---
+        
+        // 1. Simulamos que el documento SÍ existe (esto normalmente causaría error)
+        when(huespedDAO.existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), 
+                validRequest.documento()
+        )).thenReturn(true);
+        
+        // 2. Simulamos que la Nacionalidad existe
+        when(nacionalidadDAO.findById(validRequest.nacionalidadId()))
+                .thenReturn(Optional.of(nacionalidadEntity));
+        
+        // 3. Simulamos que la Localidad existe
+        when(localidadDAO.findById(validRequest.localidadId()))
+                .thenReturn(Optional.of(localidadEntity));
+        
+        // 4. Simulamos que la Dirección se guarda correctamente
+        when(direccionDAO.save(any(Direccion.class))).thenReturn(direccionEntity);
+        
+        // 5. Simulamos mapper: DTO -> Entity
+        when(huespedMapper.toEntity(validRequest)).thenReturn(huespedEntity);
+        
+        // 6. Simulamos que el DAO guarda el huésped y retorna la entidad con ID
+        when(huespedDAO.save(any(Huesped.class))).thenReturn(huespedEntity);
+        
+        // 7. Simulamos mapper: Entity -> DTO Response
+        when(huespedMapper.toResponse(huespedEntity)).thenReturn(expectedResponse);
+        
+        // --- ACT ---
+        
+        // CLAVE: Llamamos con permitirDuplicados = true
+        HuespedDTOResponse resultado = gestorPersonas.altaHuesped(validRequest, true);
+        
+        // --- ASSERT ---
+        
+        // Verificar que el resultado no sea nulo
+        assertNotNull(resultado);
+        
+        // Verificar datos del resultado
+        assertEquals(1L, resultado.id());
+        assertEquals("Juan", resultado.nombre());
+        assertEquals("Pérez", resultado.apellido());
+        assertEquals(TipoDocumento.DNI, resultado.tipoDocumento());
+        assertEquals("12345678", resultado.documento());
+        assertEquals("juan@email.com", resultado.email());
+        
+        // Verificar que se verificó la existencia del documento
+        verify(huespedDAO, times(1)).existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), validRequest.documento());
+        
+        // Verificar que se continuó con el proceso a pesar de que el documento existe
+        verify(nacionalidadDAO, times(1)).findById(validRequest.nacionalidadId());
+        verify(localidadDAO, times(1)).findById(validRequest.localidadId());
+        verify(direccionDAO, times(1)).save(any(Direccion.class));
+        verify(huespedMapper, times(1)).toEntity(validRequest);
+        verify(huespedDAO, times(1)).save(any(Huesped.class));
+        verify(huespedMapper, times(1)).toResponse(huespedEntity);
+    }
+
+    /**
+     * CAMINO FELIZ: Alta exitosa con permitirDuplicados = true y documento nuevo.
+     * 
+     * Escenario:
+     * - El tipo y número de documento NO existen en BD
+     * - Se llama al método con permitirDuplicados = true
+     * - Todas las entidades relacionadas existen (Nacionalidad, Localidad)
+     * - Datos válidos
+     * 
+     * Resultado esperado:
+     * - Se crea y guarda la Dirección
+     * - Se guarda el Huésped correctamente
+     * - Se retorna DTO de respuesta con datos del huésped
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_DocumentoNuevo_CaminoFeliz() {
+        // --- ARRANGE ---
+        
+        // 1. Simulamos que el documento NO existe
+        when(huespedDAO.existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), 
+                validRequest.documento()
+        )).thenReturn(false);
+        
+        // 2. Simulamos que la Nacionalidad existe
+        when(nacionalidadDAO.findById(validRequest.nacionalidadId()))
+                .thenReturn(Optional.of(nacionalidadEntity));
+        
+        // 3. Simulamos que la Localidad existe
+        when(localidadDAO.findById(validRequest.localidadId()))
+                .thenReturn(Optional.of(localidadEntity));
+        
+        // 4. Simulamos que la Dirección se guarda correctamente
+        when(direccionDAO.save(any(Direccion.class))).thenReturn(direccionEntity);
+        
+        // 5. Simulamos mapper: DTO -> Entity
+        when(huespedMapper.toEntity(validRequest)).thenReturn(huespedEntity);
+        
+        // 6. Simulamos que el DAO guarda el huésped y retorna la entidad con ID
+        when(huespedDAO.save(any(Huesped.class))).thenReturn(huespedEntity);
+        
+        // 7. Simulamos mapper: Entity -> DTO Response
+        when(huespedMapper.toResponse(huespedEntity)).thenReturn(expectedResponse);
+        
+        // --- ACT ---
+        
+        // Llamamos con permitirDuplicados = true (pero el documento no existe)
+        HuespedDTOResponse resultado = gestorPersonas.altaHuesped(validRequest, true);
+        
+        // --- ASSERT ---
+        
+        // Verificar que el resultado no sea nulo
+        assertNotNull(resultado);
+        
+        // Verificar datos del resultado
+        assertEquals(1L, resultado.id());
+        assertEquals("Juan", resultado.nombre());
+        assertEquals("Pérez", resultado.apellido());
+        assertEquals(TipoDocumento.DNI, resultado.tipoDocumento());
+        assertEquals("12345678", resultado.documento());
+        
+        // Verificar interacciones con los mocks
+        verify(huespedDAO, times(1)).existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), validRequest.documento());
+        verify(nacionalidadDAO, times(1)).findById(validRequest.nacionalidadId());
+        verify(localidadDAO, times(1)).findById(validRequest.localidadId());
+        verify(direccionDAO, times(1)).save(any(Direccion.class));
+        verify(huespedMapper, times(1)).toEntity(validRequest);
+        verify(huespedDAO, times(1)).save(any(Huesped.class));
+        verify(huespedMapper, times(1)).toResponse(huespedEntity);
+    }
+
+    /**
+     * CASO DE ERROR: Alta con permitirDuplicados = false y documento existente.
+     * 
+     * Escenario:
+     * - El tipo y número de documento YA existen en BD
+     * - Se llama al método con permitirDuplicados = false
+     * 
+     * Resultado esperado:
+     * - Se lanza IllegalArgumentException
+     * - NO se guarda nada en la BD
+     * - Mensaje de error apropiado
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_False_DocumentoExistente_Error() {
+        // --- ARRANGE ---
+        
+        // Simulamos que el documento SÍ existe
+        when(huespedDAO.existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), 
+                validRequest.documento()
+        )).thenReturn(true);
+        
+        // --- ACT & ASSERT ---
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gestorPersonas.altaHuesped(validRequest, false);
+        });
+        
+        // Verificamos el mensaje de error
+        assertTrue(exception.getMessage().contains("tipo y número de documento ya existen"));
+        
+        // Verificamos que el método save NUNCA fue llamado
+        verify(huespedDAO, times(1)).existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), validRequest.documento());
+        verify(nacionalidadDAO, never()).findById(any());
+        verify(localidadDAO, never()).findById(any());
+        verify(direccionDAO, never()).save(any(Direccion.class));
+        verify(huespedDAO, never()).save(any(Huesped.class));
+    }
+
+    /**
+     * CASO DE ERROR: Alta con permitirDuplicados = true pero nacionalidad no existe.
+     * 
+     * Escenario:
+     * - El documento puede estar duplicado (permitirDuplicados = true)
+     * - La nacionalidad especificada NO existe en la BD
+     * 
+     * Resultado esperado:
+     * - Se lanza IllegalArgumentException
+     * - NO se guarda nada en la BD
+     * - Mensaje de error apropiado sobre la nacionalidad
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_NacionalidadNoExiste_Error() {
+        // --- ARRANGE ---
+        
+        // 1. Documento puede existir o no, no importa
+        when(huespedDAO.existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), 
+                validRequest.documento()
+        )).thenReturn(true);
+        
+        // 2. Nacionalidad NO existe
+        when(nacionalidadDAO.findById(validRequest.nacionalidadId()))
+                .thenReturn(Optional.empty());
+        
+        // --- ACT & ASSERT ---
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gestorPersonas.altaHuesped(validRequest, true);
+        });
+        
+        // Verificamos el mensaje de error
+        assertEquals("La nacionalidad especificada no existe", exception.getMessage());
+        
+        // Verificamos que save NUNCA fue llamado
+        verify(nacionalidadDAO, times(1)).findById(validRequest.nacionalidadId());
+        verify(localidadDAO, never()).findById(any());
+        verify(direccionDAO, never()).save(any(Direccion.class));
+        verify(huespedDAO, never()).save(any(Huesped.class));
+    }
+
+    /**
+     * CASO DE ERROR: Alta con permitirDuplicados = true pero localidad no existe.
+     * 
+     * Escenario:
+     * - El documento puede estar duplicado (permitirDuplicados = true)
+     * - La nacionalidad existe
+     * - La localidad especificada NO existe en la BD
+     * 
+     * Resultado esperado:
+     * - Se lanza IllegalArgumentException
+     * - NO se guarda nada en la BD
+     * - Mensaje de error apropiado sobre la localidad
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_LocalidadNoExiste_Error() {
+        // --- ARRANGE ---
+        
+        // 1. Documento puede existir o no, no importa
+        when(huespedDAO.existsByTipoDocumentoAndDocumento(
+                validRequest.tipoDocumento(), 
+                validRequest.documento()
+        )).thenReturn(true);
+        
+        // 2. Nacionalidad existe
+        when(nacionalidadDAO.findById(validRequest.nacionalidadId()))
+                .thenReturn(Optional.of(nacionalidadEntity));
+        
+        // 3. Localidad NO existe
+        when(localidadDAO.findById(validRequest.localidadId()))
+                .thenReturn(Optional.empty());
+        
+        // --- ACT & ASSERT ---
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gestorPersonas.altaHuesped(validRequest, true);
+        });
+        
+        // Verificamos el mensaje de error
+        assertEquals("La localidad especificada no existe", exception.getMessage());
+        
+        // Verificamos que save NUNCA fue llamado
+        verify(localidadDAO, times(1)).findById(validRequest.localidadId());
+        verify(direccionDAO, never()).save(any(Direccion.class));
+        verify(huespedDAO, never()).save(any(Huesped.class));
+    }
+
+    /**
+     * CASO DE ERROR: Alta con permitirDuplicados = true pero request nulo.
+     * 
+     * Escenario:
+     * - Se envía un request null con permitirDuplicados = true
+     * 
+     * Resultado esperado:
+     * - Se lanza IllegalArgumentException
+     * - NO se guarda nada en la BD
+     * - Mensaje de error apropiado
+     */
+    @Test
+    void testAltaHuespedConPermitirDuplicados_RequestNulo_Error() {
+        // --- ACT & ASSERT ---
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            gestorPersonas.altaHuesped(null, true);
+        });
+        
+        // Verificamos el mensaje de error
+        assertEquals("Los datos del huésped no pueden ser nulos", exception.getMessage());
+        
+        // Verificamos que NINGÚN método fue llamado
+        verify(huespedDAO, never()).existsByTipoDocumentoAndDocumento(any(), any());
+        verify(huespedDAO, never()).save(any(Huesped.class));
+    }
 }

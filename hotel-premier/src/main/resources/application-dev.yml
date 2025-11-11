@@ -20,12 +20,13 @@ spring:
         use_sql_comments: true
     hibernate:
       ddl-auto: validate
+    defer-datasource-initialization: true
 
   # Ejecutar data.sql después de que Hibernate cree/valide el esquema
-  # mode: never - Los datos se cargan desde init.sql en PostgreSQL la primera vez
+  # defer-datasource-initialization: true asegura que se ejecute después de JPA
   sql:
     init:
-      mode: never
+      mode: always
       data-locations: classpath:data.sql
       continue-on-error: false
 

@@ -62,6 +62,29 @@ public class PersonaController {
     }
 
     /**
+     * Registra un nuevo huésped en el sistema permitiendo duplicados.
+     * Este endpoint se utiliza cuando el usuario confirma que desea registrar
+     * un huésped con un documento ya existente (flujo 2.B del CU09).
+     * 
+     * @param request DTO con los datos del huésped
+     * @return ResponseEntity con el huésped registrado
+     */
+    @Operation(summary = "Alta de un nuevo huésped permitiendo duplicados",
+                description = "Permite dar de alta un nuevo huésped en el sistema, incluso si el tipo y número de documento ya existen.",
+                responses = {
+                    @ApiResponse(responseCode = "201", description = "Huésped dado de alta correctamente"),
+                    @ApiResponse(responseCode = "400", description = "Error de validación en los datos"),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                })
+    @PostMapping("/huesped/alta-duplicado")
+    public ResponseEntity<HuespedDTOResponse> altaHuespedPermitirDuplicado(@Valid @RequestBody HuespedDTORequest request) {
+        log.info("POST /api/personas/huesped/alta-duplicado - Permitiendo registro con documento duplicado: {} {}", 
+                request.tipoDocumento(), request.documento());
+        HuespedDTOResponse nuevoHuesped = gestorPersonas.altaHuesped(request, true);
+        return new ResponseEntity<>(nuevoHuesped, HttpStatus.CREATED);
+    }
+
+    /**
      * Obtiene todas las localidades disponibles en el sistema.
      * 
      * @return ResponseEntity con la lista de localidades (incluye provincia y país)

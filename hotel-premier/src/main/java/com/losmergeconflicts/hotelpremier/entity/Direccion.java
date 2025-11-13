@@ -27,16 +27,16 @@ public class Direccion {
     @Column(nullable = false, length = 100)
     private String calle;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 5)
     private String numero;
 
-    @Column(length = 10)
+    @Column(length = 5)
     private String piso;
 
-    @Column(length = 10)
+    @Column(length = 5)
     private String departamento;
 
-    @Column(length = 10)
+    @Column(length = 4, nullable = false)
     private String codigoPostal;
 
     @ManyToOne

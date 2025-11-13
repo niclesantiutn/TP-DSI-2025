@@ -1,8 +1,5 @@
 package com.losmergeconflicts.hotelpremier.controller;
 
-import com.losmergeconflicts.hotelpremier.dto.HuespedDTOResponse;
-import com.losmergeconflicts.hotelpremier.entity.TipoDocumento;
-import com.losmergeconflicts.hotelpremier.service.GestorPersonas;
 import com.losmergeconflicts.hotelpremier.dto.ConserjeDTORequest;
 
 import org.springframework.stereotype.Controller;
@@ -16,8 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.RequiredArgsConstructor;
-import java.util.List;
 
 /**
  * Controlador para gestionar peticiones HTTP de interfaces de usuario.
@@ -31,10 +26,7 @@ import java.util.List;
 @Controller
 @Slf4j
 @Tag(name = "Interfaces de Usuario", description = "Endpoints para gestión de vistas e interfaces de usuario")
-@RequiredArgsConstructor
 public class UIController {
-
-    private final GestorPersonas gestorPersonas;
 
     /*
      * ===========================================
@@ -137,59 +129,22 @@ public class UIController {
     }
 
     /**
-     * Muestra la interfaz para buscar huéspedes y procesa la búsqueda.
+     * Muestra la interfaz para buscar huéspedes.
      * Este método corresponde a CU02: Buscar Huésped.
+     * La búsqueda real se realiza mediante JavaScript llamando al endpoint REST.
      *
-     * @param apellido      Criterio de búsqueda (opcional)
-     * @param nombre        Criterio de búsqueda (opcional)
-     * @param tipoDocumento Criterio de búsqueda (opcional)
-     * @param documento     Criterio de búsqueda (opcional)
-     * @param model         Modelo para pasar datos a la vista
+     * @param model Modelo para pasar datos a la vista
      * @return nombre de la vista de búsqueda de huésped
      */
-    @Operation(summary = "Mostrar interfaz de búsqueda y procesar búsqueda de huésped",
-            description = "Renderiza la página HTML para buscar huéspedes y muestra los resultados.",
+    @Operation(summary = "Mostrar interfaz de búsqueda de huésped",
+            description = "Renderiza la página HTML para buscar huéspedes.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Interfaz de búsqueda mostrada"),
                     @ApiResponse(responseCode = "401", description = "No autenticado - Redirige al login")
             })
     @GetMapping("/huesped/buscar")
-    public String buscarHuesped(
-            @RequestParam(value = "apellido", required = false) String apellido,
-            @RequestParam(value = "nombre", required = false) String nombre,
-            @RequestParam(value = "tipoDocumento", required = false) TipoDocumento tipoDocumento,
-            @RequestParam(value = "documento", required = false) String documento,
-            Model model) {
-
-        if (apellido != null) {
-            apellido = apellido.toUpperCase().replaceAll("[^A-ZÑ ]", "");
-        }
-        if (nombre != null) {
-            nombre = nombre.toUpperCase().replaceAll("[^A-ZÑ ]", "");
-        }
-        if (documento != null) {
-            documento = documento.replaceAll("[^0-9]", "");
-        }
-
-        boolean esBusquedaActiva = (apellido != null || nombre != null || (tipoDocumento != null) || documento != null);
-        List<HuespedDTOResponse> huespedes;
-
-        if (esBusquedaActiva) {
-            log.info("Realizando búsqueda con criterios LIMPIOS: Apellido[{}], Nombre[{}], Tipo[{}], Doc[{}]", apellido, nombre, tipoDocumento, documento);
-            huespedes = gestorPersonas.buscarHuespedes(apellido, nombre, tipoDocumento, documento);
-
-        } else {
-            log.debug("Mostrando interfaz de búsqueda (primera carga)");
-            huespedes = new java.util.ArrayList<HuespedDTOResponse>();
-        }
-
-        model.addAttribute("huespedes", huespedes);
-        model.addAttribute("esBusquedaActiva", esBusquedaActiva);
-        model.addAttribute("apellido", apellido);
-        model.addAttribute("nombre", nombre);
-        model.addAttribute("tipoDocumento", tipoDocumento);
-        model.addAttribute("documento", documento);
-
+    public String mostrarBuscarHuesped(Model model) {
+        log.debug("Mostrando interfaz de búsqueda de huésped");
         return "huesped-buscar";
     }
 

@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS provincias (
     id BIGSERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     pais_id BIGINT NOT NULL,
-    CONSTRAINT fk_provincias_pais FOREIGN KEY (pais_id) REFERENCES paises(id)
+    CONSTRAINT fk_provincias_pais FOREIGN KEY (pais_id) REFERENCES paises(id),
+    CONSTRAINT uk_provincias_nombre_pais UNIQUE (nombre, pais_id)
 );
 
 -- Índices
@@ -62,7 +63,8 @@ CREATE TABLE IF NOT EXISTS localidades (
     id BIGSERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     provincia_id BIGINT NOT NULL,
-    CONSTRAINT fk_localidades_provincia FOREIGN KEY (provincia_id) REFERENCES provincias(id)
+    CONSTRAINT fk_localidades_provincia FOREIGN KEY (provincia_id) REFERENCES provincias(id),
+    CONSTRAINT uk_localidades_nombre_provincia UNIQUE (nombre, provincia_id)
 );
 
 -- Índices
@@ -88,10 +90,10 @@ CREATE INDEX idx_nacionalidades_nombre ON nacionalidades(nombre);
 CREATE TABLE IF NOT EXISTS direcciones (
     id BIGSERIAL PRIMARY KEY,
     calle VARCHAR(100) NOT NULL,
-    numero VARCHAR(10) NOT NULL,
-    piso VARCHAR(10),
-    departamento VARCHAR(10),
-    codigo_postal VARCHAR(10),
+    numero VARCHAR(5) NOT NULL,
+    piso VARCHAR(5),
+    departamento VARCHAR(5),
+    codigo_postal VARCHAR(4),
     localidad_id BIGINT NOT NULL,
     CONSTRAINT fk_direcciones_localidad FOREIGN KEY (localidad_id) REFERENCES localidades(id)
 );
@@ -105,8 +107,8 @@ CREATE INDEX idx_direcciones_localidad_id ON direcciones(localidad_id);
 -- ========================================
 CREATE TABLE IF NOT EXISTS personas (
     id BIGSERIAL PRIMARY KEY,
-    cuit VARCHAR(50),
-    telefono VARCHAR(30) NOT NULL,
+    cuit VARCHAR(11),
+    telefono VARCHAR(20) NOT NULL,
     info VARCHAR(100),
     direccion_id BIGINT NOT NULL,
     CONSTRAINT fk_personas_direccion FOREIGN KEY (direccion_id) REFERENCES direcciones(id)
@@ -125,7 +127,7 @@ CREATE TABLE IF NOT EXISTS huespedes (
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
     tipo_documento VARCHAR(20),
-    documento VARCHAR(10) NOT NULL,
+    documento VARCHAR(8) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
     email VARCHAR(100),
     ocupacion VARCHAR(100) NOT NULL,

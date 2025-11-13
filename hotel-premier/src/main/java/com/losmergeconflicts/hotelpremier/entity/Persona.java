@@ -22,10 +22,10 @@ public abstract class Persona {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50)
+    @Column(length = 11)
     private String cuit;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 20)
     private String telefono;
 
     @Column(length = 100)

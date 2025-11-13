@@ -307,7 +307,7 @@
                     </div>
                     <div class="form-group">
                         <label class="required">NÚMERO DOCUMENTO</label>
-                        <input type="text" name="numeroDocumento" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
+                        <input type="text" name="numeroDocumento" maxlength="8" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label class="required">NACIONALIDAD</label>
@@ -347,19 +347,19 @@
                     </div>
                     <div class="form-group">
                         <label class="required">NÚMERO</label>
-                        <input type="text" name="numero" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
+                        <input type="text" name="numero" maxlength="5" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label>DPTO.</label>
-                        <input type="text" name="departamento" maxlength="10">
+                        <input type="text" name="departamento" maxlength="5">
                     </div>
                     <div class="form-group">
                         <label>PISO</label>
-                        <input type="text" name="piso" maxlength="10">
+                        <input type="text" name="piso" maxlength="5">
                     </div>
                     <div class="form-group">
                         <label class="required">CÓDIGO POSTAL</label>
-                        <input type="text" name="codigoPostal" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
+                        <input type="text" name="codigoPostal" maxlength="4" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                 </div>
                 
@@ -367,7 +367,7 @@
                 <div class="contact-grid">
                     <div class="form-group">
                         <label class="required">TELÉFONO</label>
-                        <input type="tel" name="telefono" maxlength="30" required>
+                        <input type="text" name="telefono" maxlength="20" required>
                     </div>
                     <div class="form-group">
                         <label>EMAIL</label>
@@ -383,7 +383,7 @@
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label class="required">POSICIÓN FRENTE AL IVA</label>
-                        <select name="posicionIVA" required>
+                        <select name="posicionIVA" id="posicionIVA" required>
                             <option value="">Seleccionar</option>
                             <option value="RESPONSABLE_INSCRIPTO">Responsable Inscripto</option>
                             <option value="MONOTRIBUTISTA">Monotributista</option>
@@ -391,8 +391,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>CUIT</label>
-                        <input type="text" name="cuit" maxlength="11" pattern="[0-9]*" inputmode="numeric" placeholder="XXXXXXXXXXX">
+                        <label id="labelCuit">CUIT</label>
+                        <input type="text" name="cuit" id="cuit" maxlength="11" pattern="[0-9]*" inputmode="numeric" placeholder="XXXXXXXXXXX">
                     </div>
                 </div>
             </form>
@@ -428,8 +428,8 @@
             cargarNacionalidades();
             cargarLocalidades();
             
-            // Convertir automáticamente a mayúsculas todos los inputs de texto
-            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+            // Convertir automáticamente a mayúsculas todos los inputs de texto (excepto teléfono)
+            const inputs = document.querySelectorAll('input[type="text"]:not([name="telefono"]), input[type="email"]');
             inputs.forEach(input => {
                 input.addEventListener('input', function(e) {
                     const start = this.selectionStart;
@@ -476,6 +476,95 @@
                     }
                 });
             });
+            
+            // Restringir campos de nombre y apellido para que solo acepten letras y espacios
+            const camposTexto = document.querySelectorAll('input[name="apellido"], input[name="nombres"]');
+            camposTexto.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    const charCode = e.which ? e.which : e.keyCode;
+                    const char = String.fromCharCode(charCode);
+                    
+                    // Permitir letras (mayúsculas, minúsculas, con acentos, ñ, ü) y espacio
+                    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]$/;
+                    
+                    if (!regex.test(char)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                // Prevenir pegar texto con caracteres no válidos
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    // Eliminar todo lo que no sea letra o espacio
+                    const cleanText = pastedText.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+                    
+                    // Respetar el maxlength
+                    const maxLength = this.getAttribute('maxlength');
+                    const finalText = maxLength ? cleanText.substring(0, maxLength) : cleanText;
+                    
+                    // Insertar el texto limpio y convertirlo a mayúsculas
+                    this.value = finalText.toUpperCase();
+                });
+                
+                // Limpiar cualquier carácter no válido en el input
+                input.addEventListener('input', function(e) {
+                    const start = this.selectionStart;
+                    const originalValue = this.value;
+                    // Eliminar todo lo que no sea letra o espacio (antes de convertir a mayúsculas)
+                    this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+                    
+                    // Ajustar la posición del cursor si se eliminaron caracteres
+                    if (originalValue !== this.value) {
+                        this.setSelectionRange(start - 1, start - 1);
+                    }
+                });
+            });
+            
+            // Restringir campo de teléfono para que solo acepte números, espacios, guiones y el signo +
+            const campoTelefono = document.querySelector('input[name="telefono"]');
+            if (campoTelefono) {
+                campoTelefono.addEventListener('keypress', function(e) {
+                    const charCode = e.which ? e.which : e.keyCode;
+                    const char = String.fromCharCode(charCode);
+                    
+                    // Permitir números (0-9), espacios, guiones (-) y el signo más (+)
+                    const regex = /^[0-9\s\-\+]$/;
+                    
+                    if (!regex.test(char)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                // Prevenir pegar texto con caracteres no válidos
+                campoTelefono.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    // Eliminar todo lo que no sea número, espacio, guión o +
+                    const cleanText = pastedText.replace(/[^0-9\s\-\+]/g, '');
+                    
+                    // Respetar el maxlength
+                    const maxLength = this.getAttribute('maxlength');
+                    const finalText = maxLength ? cleanText.substring(0, maxLength) : cleanText;
+                    
+                    this.value = finalText;
+                });
+                
+                // Limpiar cualquier carácter no válido en el input
+                campoTelefono.addEventListener('input', function(e) {
+                    const start = this.selectionStart;
+                    const originalValue = this.value;
+                    // Eliminar todo lo que no sea número, espacio, guión o +
+                    this.value = this.value.replace(/[^0-9\s\-\+]/g, '');
+                    
+                    // Ajustar la posición del cursor si se eliminaron caracteres
+                    if (originalValue !== this.value) {
+                        this.setSelectionRange(start - 1, start - 1);
+                    }
+                });
+            }
         });
 
         /**
@@ -629,6 +718,27 @@
         });
 
         /**
+         * Event listener para validar el campo CUIT según la posición frente al IVA
+         * Si es RESPONSABLE_INSCRIPTO, el CUIT es obligatorio
+         */
+        document.getElementById('posicionIVA').addEventListener('change', function() {
+            const cuitInput = document.getElementById('cuit');
+            const cuitLabel = document.getElementById('labelCuit');
+            
+            if (this.value === 'RESPONSABLE_INSCRIPTO') {
+                // Hacer el CUIT obligatorio
+                cuitInput.required = true;
+                cuitLabel.classList.add('required');
+                console.log('CUIT es ahora obligatorio (Responsable Inscripto)');
+            } else {
+                // Hacer el CUIT opcional
+                cuitInput.required = false;
+                cuitLabel.classList.remove('required');
+                console.log('CUIT es ahora opcional');
+            }
+        });
+
+        /**
          * Valida y envía el formulario de registro de huésped
          * @param {boolean} permitirDuplicado - Si es true, utiliza el endpoint que permite duplicados
          */
@@ -638,6 +748,7 @@
                 const form = document.querySelector('.modal-body');
                 
                 // Validar el formulario HTML5
+                // (la validación del CUIT se maneja automáticamente con el atributo required)
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;

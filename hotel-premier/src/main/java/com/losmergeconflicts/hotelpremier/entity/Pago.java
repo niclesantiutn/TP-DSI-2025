@@ -32,7 +32,7 @@ public class Pago {
     private LocalDate fechaCobro;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private TipoMoneda moneda;
 
     @Column(nullable = false)

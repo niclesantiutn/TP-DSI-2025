@@ -23,14 +23,14 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)  // Incluye los campos de MedioDePago en equals/hashCode
 @ToString(callSuper = true)  // Incluye los campos de MedioDePago en toString
 public class Cheque extends MedioDePago {
-    @Column(nullable = false)
+    @Column(nullable = false, length = 8)
     private String numero;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String plaza;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private TipoCheque tipoCheque;
 
     @ManyToOne

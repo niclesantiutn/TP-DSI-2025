@@ -26,5 +26,5 @@ public class ItemConsumo {
     private String nombre;
 
     @Column(nullable = false)
-    private Double precio;
+    private Float precio;
 }

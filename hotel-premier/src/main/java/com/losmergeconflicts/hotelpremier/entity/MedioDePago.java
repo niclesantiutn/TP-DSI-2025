@@ -15,14 +15,11 @@ import lombok.Data;
 @Entity
 @Table(name = "medios_de_pago")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Data  // Genera getters, setters, toString, equals y hashCode
+@Data
 public abstract class MedioDePago {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
-    private TipoMedioPago tipo;
 
 }

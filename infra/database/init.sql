@@ -368,14 +368,20 @@ CREATE INDEX idx_factura_detalles_factura_id ON factura_detalles(factura_id);
 -- ========================================
 CREATE TABLE IF NOT EXISTS medios_de_pago (
     id BIGSERIAL PRIMARY KEY,
-    tipo VARCHAR(15) NOT NULL
+    dtype VARCHAR(31) NOT NULL -- Hibernate usa esto automáticamente para diferenciar (Tarjeta, Cheque, Efectivo)
 );
 
 -- Índice
-CREATE INDEX idx_medios_de_pago_tipo ON medios_de_pago(tipo);
+CREATE INDEX idx_medios_de_pago_tipo ON medios_de_pago(dtype);
 
--- Comentarios sobre tipos enumerados:
--- tipo: TARJETA_CREDITO, TARJETA_DEBITO, CHEQUE
+-- ========================================
+-- TABLA: efectivo (Tabla hija - JOINED inheritance)
+-- FALTABA ESTA TABLA
+-- ========================================
+CREATE TABLE IF NOT EXISTS efectivo (
+    id BIGINT PRIMARY KEY,
+    CONSTRAINT fk_efectivo_medio_de_pago FOREIGN KEY (id) REFERENCES medios_de_pago(id) ON DELETE CASCADE
+);
 
 -- ========================================
 -- TABLA: cheques (Tabla hija - JOINED inheritance)
@@ -383,13 +389,13 @@ CREATE INDEX idx_medios_de_pago_tipo ON medios_de_pago(tipo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS cheques (
     id BIGINT PRIMARY KEY,
-    numero VARCHAR(8) NOT NULL,
+    numero VARCHAR(50) NOT NULL,
     plaza VARCHAR(100) NOT NULL,
-    tipo_cheque VARCHAR(10) NOT NULL,
+    tipo_cheque VARCHAR(20) NOT NULL,
     banco_id BIGINT NOT NULL,
     CONSTRAINT fk_cheques_medio_de_pago FOREIGN KEY (id) REFERENCES medios_de_pago(id) ON DELETE CASCADE,
     CONSTRAINT fk_cheques_banco FOREIGN KEY (banco_id) REFERENCES bancos(id)
-);
+    );
 
 -- Índices
 CREATE INDEX idx_cheques_numero ON cheques(numero);
@@ -404,11 +410,12 @@ CREATE INDEX idx_cheques_banco_id ON cheques(banco_id);
 -- ========================================
 CREATE TABLE IF NOT EXISTS tarjetas (
     id BIGINT PRIMARY KEY,
-    red_de_pago VARCHAR(10) NOT NULL,
+    red_de_pago VARCHAR(20) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     banco_id BIGINT NOT NULL,
     CONSTRAINT fk_tarjetas_medio_de_pago FOREIGN KEY (id) REFERENCES medios_de_pago(id) ON DELETE CASCADE,
     CONSTRAINT fk_tarjetas_banco FOREIGN KEY (banco_id) REFERENCES bancos(id)
-);
+    );
 
 -- Índices
 CREATE INDEX idx_tarjetas_red_de_pago ON tarjetas(red_de_pago);
@@ -435,10 +442,10 @@ CREATE TABLE IF NOT EXISTS pagos (
     importe REAL NOT NULL,
     cotizacion REAL,
     factura_id BIGINT NOT NULL,
-    medio_de_pago_id BIGINT NOT NULL,
+    medio_de_pago_id BIGINT NOT NULL UNIQUE,
     CONSTRAINT fk_pagos_factura FOREIGN KEY (factura_id) REFERENCES facturas(id),
     CONSTRAINT fk_pagos_medio_de_pago FOREIGN KEY (medio_de_pago_id) REFERENCES medios_de_pago(id)
-);
+    );
 
 -- Índices
 CREATE INDEX idx_pagos_factura_id ON pagos(factura_id);

@@ -1,12 +1,6 @@
 package com.losmergeconflicts.hotelpremier.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,19 +12,21 @@ import lombok.ToString;
 @Table(name = "cheques")
 @Getter
 @Setter
-@NoArgsConstructor  // Genera constructor sin argumentos (requerido por JPA)
-@AllArgsConstructor  // Genera constructor con todos los argumentos
-@EqualsAndHashCode(callSuper = true)  // Incluye los campos de MedioDePago en equals/hashCode
-@ToString(callSuper = true)  // Incluye los campos de MedioDePago en toString
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@PrimaryKeyJoinColumn(name = "id_medio_de_pago")
 public class Cheque extends MedioDePago {
-    @Column(nullable = false, length = 8)
-    private String numero;
+
+    @Column(nullable = false, length = 50)
+    private String numero; // Representa 'nro_cheque' del diagrama
 
     @Column(nullable = false, length = 100)
     private String plaza;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private TipoCheque tipoCheque;
 
     @ManyToOne

@@ -2,16 +2,7 @@ package com.losmergeconflicts.hotelpremier.entity;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,7 +35,7 @@ public class Pago {
     @JoinColumn(name = "factura_id", nullable = false)
     private Factura factura;
 
-    @OneToOne
-    @JoinColumn(name = "medio_de_pago_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL) // sin esto tenes que hacer dos save(): primero guardar la Tarjeta en su repositorio y luego el Pago.
+    @JoinColumn(name = "medio_de_pago_id", nullable = false, unique = true)
     private MedioDePago medioDePago;
 }

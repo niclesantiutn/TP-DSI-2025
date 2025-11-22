@@ -12,7 +12,7 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "id_medio_de_pago")
+@PrimaryKeyJoinColumn(name = "id")
 public class Efectivo extends MedioDePago {
 
 }

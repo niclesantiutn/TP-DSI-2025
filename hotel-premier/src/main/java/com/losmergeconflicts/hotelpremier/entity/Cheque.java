@@ -16,7 +16,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "id_medio_de_pago")
+@PrimaryKeyJoinColumn(name = "id")
 public class Cheque extends MedioDePago {
 
     @Column(nullable = false, length = 50)

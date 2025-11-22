@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estado de Habitaciones - Hotel Premier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .table-container {
+            max-height: 450px;
+            overflow: auto;
+            border: 1px solid #e5e7eb;
+        }
+
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f3f4f6;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 30;
+            background-color: #f9fafb;
+            border-right: 2px solid #d1d5db;
+        }
+
+        .sticky-header th.sticky-col {
+            z-index: 40;
+            background-color: #e5e7eb;
+        }
+
+        /* COLORES DE ESTADOS */
+        .estado-OCUPADA { background-color: #dc2626; } /* Rojo */
+        .estado-RESERVADA { background-color: #facc15; } /* Amarillo */
+        .estado-LIBRE { background-color: #07672a; } /* Verde */
+
+        td { height: 40px; min-width: 60px; }
+    </style>
+</head>
+<body>
+
+<nav class="bg-white/95 px-8 py-4 shadow-md flex justify-between items-center mb-8">
+    <div class="text-2xl font-bold text-[#667eea] flex items-center gap-2">
+        <i class="fas fa-hotel"></i> Hotel Premier
+    </div>
+    <a href="/menu-principal" class="px-5 py-2 bg-[#764ba2] text-white rounded hover:bg-red-600 transition text-sm font-bold shadow">
+        Volver al Menú
+    </a>
+</nav>
+
+<div class="max-w-[1200px] mx-auto bg-white rounded-lg shadow-2xl overflow-hidden p-8 relative">
+
+    <div class="border-b border-gray-200 pb-4 mb-6 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-gray-800 uppercase tracking-wide">
+            Estado de Habitaciones
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 items-end bg-gray-50 p-5 rounded-lg border border-gray-200">
+        <div>
+            <label class="block font-bold text-xs mb-2 uppercase text-gray-600">Desde Fecha</label>
+            <input type="date" id="desde" class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-[#667eea] outline-none text-sm">
+        </div>
+        <div>
+            <label class="block font-bold text-xs mb-2 uppercase text-gray-600">Hasta Fecha</label>
+            <input type="date" id="hasta" class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-[#667eea] outline-none text-sm">
+        </div>
+        <div>
+            <label class="block font-bold text-xs mb-2 uppercase text-gray-600">Tipo Habitación</label>
+            <select id="tipo" class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-[#667eea] outline-none bg-white text-sm">
+                <option value="">Todas las habitaciones</option>
+                <option th:each="t : ${tiposHabitacion}" th:value="${t}" th:text="${t}"></option>
+            </select>
+        </div>
+        <div>
+            <button onclick="cargarGrilla()" class="bg-[#667eea] hover:bg-[#5a6fd6] text-white font-bold py-2 px-6 rounded w-full transition shadow uppercase text-sm flex justify-center items-center gap-2">
+                <i class="fas fa-search"></i> BUSCAR
+            </button>
+        </div>
+    </div>
+
+    <div id="errorMsg" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 text-sm font-bold shadow-sm rounded-r flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span id="errorText"></span>
+    </div>
+
+    <div class="table-container relative shadow-inner bg-gray-100 rounded mb-6">
+        <table class="w-full text-center border-collapse bg-white">
+            <thead class="text-gray-700 uppercase text-xs font-bold sticky-header">
+            <tr id="headerRow">
+                <th class="p-3 sticky-col min-w-[120px] shadow-sm text-gray-600 bg-gray-100 z-40">DÍAS</th>
+            </tr>
+            </thead>
+            <tbody id="bodyRows" class="text-sm">
+            <tr>
+                <td colspan="10" class="p-12 text-gray-400 italic text-center">
+                    Seleccione un rango de fechas y presione BUSCAR.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex flex-col items-center border-t border-gray-200 pt-4">
+        <div class="text-sm text-gray-800 mb-3 font-medium tracking-wide text-center">
+            <span class="font-bold">IE</span> - Individual Estándar <span class="mx-2 text-gray-300">|</span>
+            <span class="font-bold">DE</span> - Doble Estándar <span class="mx-2 text-gray-300">|</span>
+            <span class="font-bold">DS</span> - Doble Superior <span class="mx-2 text-gray-300">|</span>
+            <span class="font-bold">SFP</span> - Superior Family Plan <span class="mx-2 text-gray-300">|</span>
+            <span class="font-bold">SD</span> - Suite Doble
+        </div>
+        <div class="flex gap-10 text-sm font-bold text-gray-700 uppercase">
+            <div class="flex items-center">
+                <div class="w-5 h-5 bg-[#dc2626] rounded-full mr-2 shadow-sm border border-gray-200"></div> Ocupada
+            </div>
+            <div class="flex items-center">
+                <div class="w-5 h-5 bg-[#facc15] rounded-full mr-2 shadow-sm border border-gray-200"></div> Reservada
+            </div>
+            <div class="flex items-center">
+                <div class="w-5 h-5 bg-[#07672a] rounded-full mr-2 shadow-sm border border-gray-200"></div> Libre
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-4">
+        <button id="btnAccion"
+                class="bg-[#667eea] hover:bg-[#5568d3] text-white font-bold py-2 px-8 rounded shadow transition disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm"
+                th:text="${textoBoton}" disabled>
+        </button>
+
+        <a href="/menu-principal" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded transition uppercase text-sm flex items-center">
+            Cancelar
+        </a>
+    </div>
+
+    <div id="modalReserva" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black p-8 w-[500px] shadow-2xl relative">
+
+            <div class="flex items-start gap-4 mb-6">
+                <div class="bg-blue-600 text-white p-3 rounded shadow">
+                    <i class="fas fa-info-circle fa-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-black leading-tight">
+                        Esta habitación se encuentra reservada por:
+                    </h3>
+                </div>
+            </div>
+
+            <div class="ml-16 mb-8 text-sm text-gray-800 font-mono space-y-2">
+                <p>Apellido: <span id="modalApellido" class="font-bold text-black"></span></p>
+                <p>Nombres: <span id="modalNombre" class="font-bold text-black"></span></p>
+                <p>Teléfono: <span id="modalTelefono" class="font-bold text-black"></span></p>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-8">
+                <button id="btnOcuparIgual"
+                        class="border-2 border-black px-6 py-2 text-sm font-bold uppercase hover:bg-gray-100 transition text-black">
+                    OCUPAR IGUAL
+                </button>
+                <button onclick="cerrarModal()"
+                        class="border-2 border-black px-6 py-2 text-sm font-bold uppercase hover:bg-gray-100 transition text-black">
+                    VOLVER
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const inputDesde = document.getElementById('desde');
+    const inputHasta = document.getElementById('hasta');
+    const inputTipo = document.getElementById('tipo');
+    const btnAccion = document.getElementById('btnAccion');
+    const errorMsg = document.getElementById('errorMsg');
+    const errorText = document.getElementById('errorText');
+    const modal = document.getElementById('modalReserva');
+
+    let seleccionPendiente = null;
+
+    // --- 1. Lógica de Carga de Grilla ---
+    async function cargarGrilla() {
+        const desde = inputDesde.value;
+        const hasta = inputHasta.value;
+        const tipo = inputTipo.value;
+
+        if (!desde) {
+            mostrarError("Debe ingresar la fecha 'Desde'.", inputDesde);
+            return;
+        }
+        if (!hasta) {
+            mostrarError("Debe ingresar la fecha 'Hasta'.", inputHasta);
+            return;
+        }
+        if (desde > hasta) {
+            mostrarError("La fecha 'Hasta' no puede ser anterior a 'Desde'.", inputHasta);
+            limpiarTabla();
+            return;
+        }
+        mostrarError(null);
+
+        try {
+            // Construcción URL
+            let url = `/api/habitaciones/estados?desde=${desde}&hasta=${hasta}`;
+            if (tipo) url += `&tipo=${tipo}`;
+
+            const res = await fetch(url);
+
+            // Manejo de errores del Backend (400 Bad Request)
+            if (!res.ok) {
+                const msg = await res.text();
+                let foco = inputHasta;
+                if (msg.toLowerCase().includes("desde") || msg.toLowerCase().includes("antigua")) {
+                    foco = inputDesde;
+                }
+                mostrarError(msg, foco);
+                limpiarTabla();
+                return;
+            }
+
+            const data = await res.json();
+            renderizar(data);
+            btnAccion.disabled = false;
+
+        } catch (e) {
+            console.error(e);
+            mostrarError("Error de conexión con el servidor.", null);
+            btnAccion.disabled = true;
+        }
+    }
+
+    // --- 2. Renderizado de Tabla ---
+    function renderizar(data) {
+        const header = document.getElementById('headerRow');
+        const body = document.getElementById('bodyRows');
+
+        // Header
+        header.innerHTML = '<th class="p-3 sticky-col border border-gray-300 shadow-sm bg-gray-100 z-40 text-gray-600">DÍAS</th>';
+
+        if (data.nombresHabitaciones.length === 0) {
+            body.innerHTML = '<tr><td colspan="10" class="p-8 text-center text-gray-500">No hay habitaciones encontradas.</td></tr>';
+            return;
+        }
+
+        data.nombresHabitaciones.forEach(name => {
+            header.innerHTML += `<th class="p-2 border border-gray-300 min-w-[80px] bg-gray-200 text-gray-700">${name}</th>`;
+        });
+
+        // Body
+        body.innerHTML = '';
+        data.filas.forEach(fila => {
+            let rowHtml = `<tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-2 border border-gray-300 sticky-col bg-white font-mono text-xs font-bold text-gray-600 shadow-sm">
+                        ${formatoFecha(fila.fecha)}
+                    </td>`;
+
+            data.nombresHabitaciones.forEach(hab => {
+                const estado = fila.estadosPorHabitacion[hab];
+                let claseColor = 'estado-LIBRE';
+                let funcionClick = '';
+
+                if (estado === 'OCUPADA') {
+                    claseColor = 'estado-OCUPADA';
+                    // Ocupadas no hacen nada por ahora
+                } else if (estado === 'RESERVADA') {
+                    claseColor = 'estado-RESERVADA';
+                    // Click en Reservada activa lógica especial
+                    funcionClick = `onclick="gestionarClickCelda('${hab}', '${fila.fecha}', 'RESERVADA')"`;
+                } else {
+                    // Libre
+                    funcionClick = `onclick="gestionarClickCelda('${hab}', '${fila.fecha}', 'LIBRE')"`;
+                }
+
+                rowHtml += `<td class="border border-gray-300 cursor-pointer ${claseColor} opacity-90 hover:opacity-100 transition"
+                                ${funcionClick}
+                                title="${hab} - ${estado}">
+                            </td>`;
+            });
+            rowHtml += '</tr>';
+            body.insertAdjacentHTML('beforeend', rowHtml);
+        });
+    }
+
+    // --- 3. Gestión de Clics en Celdas ---
+    async function gestionarClickCelda(nombreHab, fecha, estado) {
+        const contexto = "[[${contexto}]]"; // Thymeleaf injecta 'reservar' u 'ocupar'
+
+        if (contexto === 'ocupar') {
+            if (estado === 'RESERVADA') {
+                // CASO 3.D: Ocupar habitación reservada -> MODAL
+                await mostrarModalReserva(nombreHab, fecha);
+            } else if (estado === 'LIBRE') {
+                // CASO NORMAL: Ocupar habitación libre
+                alert(`Seleccionada para ocupar: ${nombreHab} el ${fecha}`);
+                // Aquí podrías redirigir directo o marcar la celda visualmente
+            }
+        } else if (contexto === 'reservar') {
+            if (estado === 'LIBRE') {
+                // Lógica de reserva (selección de rango)
+                alert(`Seleccionada para inicio reserva: ${nombreHab}`);
+            } else {
+                mostrarError("No se puede reservar una habitación ocupada o ya reservada.", null);
+            }
+        }
+    }
+
+    // --- 4. Lógica del Modal (Backend Call) ---
+    async function mostrarModalReserva(nombre, fecha) {
+        try {
+            const res = await fetch(`/api/habitaciones/reserva-detalle?nombre=${nombre}&fecha=${fecha}`);
+            if (!res.ok) throw new Error("Error obteniendo detalle");
+
+            const detalle = await res.json();
+
+            // Rellenar datos
+            document.getElementById('modalApellido').textContent = detalle.apellido;
+            document.getElementById('modalNombre').textContent = detalle.nombre;
+            document.getElementById('modalTelefono').textContent = detalle.telefono;
+
+            // Guardar referencia temporal
+            seleccionPendiente = { nombre, fecha };
+
+            // Mostrar
+            modal.classList.remove('hidden');
+        } catch (e) {
+            console.error(e);
+            mostrarError("No se pudieron cargar los datos de la reserva.", null);
+        }
+    }
+
+    function cerrarModal() {
+        modal.classList.add('hidden');
+        seleccionPendiente = null;
+    }
+
+    // Botón "OCUPAR IGUAL" del Modal
+    document.getElementById('btnOcuparIgual').addEventListener('click', () => {
+        if (seleccionPendiente) {
+            // Aquí iría la redirección real al formulario de ocupación
+            alert(`Procesando ocupación forzada para ${seleccionPendiente.nombre}...`);
+            // window.location.href = ...
+            cerrarModal();
+        }
+    });
+
+    function formatoFecha(iso) {
+        const [y, m, d] = iso.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function mostrarError(msg, elementToFocus) {
+        if (msg) {
+            errorText.textContent = msg;
+            errorMsg.classList.remove('hidden');
+            if (elementToFocus) {
+                elementToFocus.focus();
+                elementToFocus.classList.add('border-red-500', 'ring-1', 'ring-red-500');
+                setTimeout(() => {
+                    elementToFocus.classList.remove('border-red-500', 'ring-1', 'ring-red-500');
+                }, 3000);
+            }
+        } else {
+            errorMsg.classList.add('hidden');
+        }
+    }
+
+    function limpiarTabla() {
+        document.getElementById('bodyRows').innerHTML = '<tr><td colspan="10" class="p-12 text-gray-400 italic text-center">Corrija los errores para buscar.</td></tr>';
+        btnAccion.disabled = true;
+    }
+
+    // Botón Acción Principal (RESERVAR/OCUPAR)
+    btnAccion.addEventListener('click', () => {
+        const contexto = "[[${contexto}]]";
+        // Esta lógica se activa si el usuario selecciona celdas y luego da click al botón grande
+        alert("Acción principal: " + contexto);
+    });
+
+</script>
+</body>
+</html>

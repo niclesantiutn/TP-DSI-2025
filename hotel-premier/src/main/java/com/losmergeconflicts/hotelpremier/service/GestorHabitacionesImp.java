@@ -6,7 +6,9 @@ import com.losmergeconflicts.hotelpremier.dao.ReservaDAO;
 import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
 import com.losmergeconflicts.hotelpremier.dto.GrillaDisponibilidadDTO;
 import com.losmergeconflicts.hotelpremier.dto.HabitacionDTO;
+import com.losmergeconflicts.hotelpremier.dto.HabitacionDTOResponse;
 import com.losmergeconflicts.hotelpremier.entity.*;
+import com.losmergeconflicts.hotelpremier.mapper.HabitacionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
     private final HabitacionDAO habitacionDAO;
     private final ReservaDAO reservaDAO;
     private final EstadiaDAO estadiaDAO;
+    private final HabitacionMapper habitacionMapper;
 
     @Override
     public void modificarHabitacion(HabitacionDTO habitacionDTO) {
@@ -113,5 +117,42 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
                 reserva.getHuesped().getNombre(),
                 reserva.getHuesped().getTelefono()
         );
+    }
+
+    /**
+     * Lista las habitaciones filtradas por sus IDs.
+     * 
+     * Busca las habitaciones en la base de datos usando los IDs proporcionados
+     * y las convierte a DTOs de respuesta usando el mapper.
+     * 
+     * @param idsHabitaciones Lista de IDs de habitaciones a buscar
+     * @return Lista de DTOs de las habitaciones encontradas (se retorna solo los datos limitados que se requieren para la vista)
+     * @throws IllegalArgumentException si la lista de IDs es nula o vacía
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTOResponse> listarHabitacionesPorID(List<Long> idsHabitaciones) {
+        
+        if (idsHabitaciones == null || idsHabitaciones.isEmpty()) {
+            log.warn("Intento de listar habitaciones con lista de IDs vacía o nula");
+            throw new IllegalArgumentException("La lista de IDs de habitaciones no puede ser nula o vacía");
+        }
+
+        log.info("Listando habitaciones por IDs: {}", idsHabitaciones);
+
+        // Buscar habitaciones por IDs
+        List<Habitacion> habitaciones = habitacionDAO.findAllById(idsHabitaciones);
+
+        if (habitaciones.isEmpty()) {
+            log.warn("No se encontraron habitaciones con los IDs proporcionados: {}", idsHabitaciones);
+            return new ArrayList<>();
+        }
+
+        log.debug("Se encontraron {} habitaciones", habitaciones.size());
+
+        // Convertir entidades a DTOs usando el mapper
+        return habitaciones.stream()
+                .map(habitacionMapper::toResponseLimited)
+                .collect(Collectors.toList());
     }
 }

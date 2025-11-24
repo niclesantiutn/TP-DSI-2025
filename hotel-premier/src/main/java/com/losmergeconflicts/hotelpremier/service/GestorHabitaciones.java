@@ -3,6 +3,7 @@ package com.losmergeconflicts.hotelpremier.service;
 import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
 import com.losmergeconflicts.hotelpremier.dto.GrillaDisponibilidadDTO;
 import com.losmergeconflicts.hotelpremier.dto.HabitacionDTO;
+import com.losmergeconflicts.hotelpremier.dto.HabitacionDTOResponse;
 import com.losmergeconflicts.hotelpremier.entity.Habitacion;
 import com.losmergeconflicts.hotelpremier.entity.TipoHabitacion;
 
@@ -18,4 +19,6 @@ public interface GestorHabitaciones {
     GrillaDisponibilidadDTO obtenerEstados(LocalDate desde, LocalDate hasta, TipoHabitacion tipo);
 
     DetalleReservaDTO obtenerDetalleReserva(String nombreHabitacion, LocalDate fecha);
+
+    List<HabitacionDTOResponse> listarHabitacionesPorID(List<Long> idsHabitaciones);
 }

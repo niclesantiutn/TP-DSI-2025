@@ -62,6 +62,10 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
         }
 
         List<String> nombresHabitaciones = habitaciones.stream().map(Habitacion::getNombre).toList();
+        
+        // Crear mapa de nombre -> ID
+        Map<String, Long> idsHabitaciones = habitaciones.stream()
+                .collect(java.util.stream.Collectors.toMap(Habitacion::getNombre, Habitacion::getId));
 
         // 2. Obtener Reservas y Estadías en el rango
         List<Reserva> reservas = reservaDAO.findReservasEnRango(fechaDesde, fechaHasta);
@@ -83,7 +87,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
             current = current.plusDays(1);
         }
 
-        return new GrillaDisponibilidadDTO(nombresHabitaciones, filas);
+        return new GrillaDisponibilidadDTO(nombresHabitaciones, idsHabitaciones, filas);
     }
 
     private TipoEstadoHabitacion calcularEstado(Habitacion hab, LocalDate fecha, List<Reserva> reservas, List<Estadia> estadias) {

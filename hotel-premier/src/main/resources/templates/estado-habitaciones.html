@@ -302,8 +302,8 @@
         const header = document.getElementById('headerRow');
         const body = document.getElementById('bodyRows');
         
-        // Guardar mapping de habitaciones para obtener IDs
-        window.habitacionesMap = {};
+        // Guardar mapping de habitaciones (ahora vienen del backend)
+        window.habitacionesMap = data.idsHabitaciones;
 
         // Header
         header.innerHTML = '<th class="p-3 sticky-col border border-gray-300 shadow-sm bg-gray-100 z-40 text-gray-600">DÍAS</th>';
@@ -327,13 +327,8 @@
 
             data.nombresHabitaciones.forEach((hab, indexHab) => {
                 const estado = fila.estadosPorHabitacion[hab];
-                // Generar un ID único basado en índices
-                const habitacionId = `hab_${indexHab}`;
-                
-                // Guardar mapeo (usaremos el índice como ID temporal)
-                if (!window.habitacionesMap[hab]) {
-                    window.habitacionesMap[hab] = indexHab + 1; // +1 para simular IDs desde 1
-                }
+                // Usar el ID real de la habitación que viene del backend
+                const habitacionId = data.idsHabitaciones[hab];
                 
                 let claseColor = 'estado-LIBRE';
                 let funcionClick = '';

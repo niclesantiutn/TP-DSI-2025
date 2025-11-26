@@ -251,14 +251,12 @@ public class GestorPersonasImp implements GestorPersonas {
     public List<HuespedDTOResponse> buscarHuespedes(String apellido, String nombre, TipoDocumento tipoDoc, String nroDoc) {
 
         if (apellido != null) {
-            // A mayúsculas y solo permite letras, eñes y espacios
-            apellido = apellido.toUpperCase().replaceAll("[^A-ZÑ ]", "");
+            apellido = apellido.toUpperCase().replaceAll("[^A-ZÑÁÉÍÓÚÜ ]", "");
         }
         if (nombre != null) {
-            nombre = nombre.toUpperCase().replaceAll("[^A-ZÑ ]", "");
+            nombre = nombre.toUpperCase().replaceAll("[^A-ZÑÁÉÍÓÚÜ ]", "");
         }
         if (nroDoc != null) {
-            // Solo permite números
             nroDoc = nroDoc.replaceAll("[^0-9]", "");
         }
 

@@ -3,12 +3,10 @@ package com.losmergeconflicts.hotelpremier.service;
 import com.losmergeconflicts.hotelpremier.dao.EstadiaDAO;
 import com.losmergeconflicts.hotelpremier.dao.HabitacionDAO;
 import com.losmergeconflicts.hotelpremier.dao.ReservaDAO;
-import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
-import com.losmergeconflicts.hotelpremier.dto.GrillaDisponibilidadDTO;
-import com.losmergeconflicts.hotelpremier.dto.HabitacionDTO;
-import com.losmergeconflicts.hotelpremier.dto.HabitacionDTOResponse;
+import com.losmergeconflicts.hotelpremier.dto.*;
 import com.losmergeconflicts.hotelpremier.entity.*;
 import com.losmergeconflicts.hotelpremier.mapper.HabitacionMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,17 +27,37 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
     private final HabitacionMapper habitacionMapper;
 
     @Override
-    public void modificarHabitacion(HabitacionDTO habitacionDTO) {
+    @Transactional
+    public HabitacionDTOResponse modificarHabitacion(Long id, HabitacionDTORequest request) {
+        log.info("Intentando modificar habitación con ID: {}", id);
+
+        Habitacion habitacion = habitacionDAO.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró la habitación con ID: " + id));
+
+        habitacionMapper.updateEntityFromRequest(request, habitacion);
+
+        Habitacion habitacionGuardada = habitacionDAO.save(habitacion);
+        log.info("Habitación actualizada correctamente: {}", habitacionGuardada.getNombre());
+
+        return habitacionMapper.toResponse(habitacionGuardada);
     }
 
     @Override
-    public Habitacion buscarHabitacion(int id) {
-        return habitacionDAO.findById((long) id).orElse(null);
+    @Transactional(readOnly = true)
+    public HabitacionDTOResponse buscarHabitacion(Long id) {
+        log.debug("Buscando habitación con ID: {}", id);
+        return habitacionDAO.findById(id)
+                .map(habitacionMapper::toResponse)
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró la habitación con ID: " + id));
     }
 
     @Override
-    public List<Habitacion> listarHabitaciones() {
-        return habitacionDAO.findAll();
+    @Transactional(readOnly = true)
+    public List<HabitacionDTOResponse> listarHabitaciones() {
+        log.debug("Listando todas las habitaciones");
+        return habitacionDAO.findAll().stream()
+                .map(habitacionMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -62,7 +80,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
         }
 
         List<String> nombresHabitaciones = habitaciones.stream().map(Habitacion::getNombre).toList();
-        
+
         // Crear mapa de nombre -> ID
         Map<String, Long> idsHabitaciones = habitaciones.stream()
                 .collect(java.util.stream.Collectors.toMap(Habitacion::getNombre, Habitacion::getId));
@@ -91,7 +109,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
     }
 
     private TipoEstadoHabitacion calcularEstado(Habitacion hab, LocalDate fecha, List<Reserva> reservas, List<Estadia> estadias) {
-        // Prioridad 1: OCUPADA (ROJO)
+        // Prioridad 1: OCUPADA
         boolean ocupada = estadias.stream().anyMatch(e ->
                 e.getHabitacion().getId().equals(hab.getId()) &&
                         !fecha.isBefore(e.getFechaHoraIngreso().toLocalDate()) &&
@@ -99,7 +117,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
         );
         if (ocupada) return TipoEstadoHabitacion.OCUPADA;
 
-        // Prioridad 2: RESERVADA (AMARILLO)
+        // Prioridad 2: RESERVADA
         boolean reservada = reservas.stream().anyMatch(r ->
                 r.getHabitaciones().stream().anyMatch(h -> h.getId().equals(hab.getId())) &&
                         !fecha.isBefore(r.getFechaIngreso()) &&
@@ -107,7 +125,7 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
         );
         if (reservada) return TipoEstadoHabitacion.RESERVADA;
 
-        // Prioridad 3: LIBRE (BLANCO)
+        // Prioridad 3: LIBRE
         return TipoEstadoHabitacion.LIBRE;
     }
 

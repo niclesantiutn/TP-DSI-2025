@@ -1,8 +1,10 @@
 package com.losmergeconflicts.hotelpremier.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +42,7 @@ public class GestorReservasImp implements GestorReservas {
      * @param reservaMapper
      */
     @Autowired
-    public GestorReservasImp(ReservaDAO reservaDAO,
-                             HabitacionDAO habitacionDAO,
-                             ReservaMapper reservaMapper) {
+    public GestorReservasImp(ReservaDAO reservaDAO, HabitacionDAO habitacionDAO, ReservaMapper reservaMapper) {
         this.reservaDAO = reservaDAO;
         this.habitacionDAO = habitacionDAO;
         this.reservaMapper = reservaMapper;
@@ -118,7 +118,7 @@ public class GestorReservasImp implements GestorReservas {
             return reservaMapper.toResponse(reservaGuardada);
 
         } catch (Exception e) {
-            log.error("Error al registrar reserva para {} {}", 
+            log.error("Error al registrar reserva para {} {}",
                     request.nombreHuesped(), request.apellidoHuesped(), e);
             throw new RuntimeException("Error al procesar el registro de la reserva", e);
         }

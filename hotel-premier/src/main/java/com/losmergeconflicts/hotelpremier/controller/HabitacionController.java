@@ -36,24 +36,9 @@ public class HabitacionController {
 
         log.info("REST: Solicitando estados. Desde: {}, Hasta: {}, Tipo: {}", desde, hasta, (tipo != null ? tipo : "TODAS"));
 
-        try {
-            if (desde == null) {
-                return ResponseEntity.badRequest().body("La fecha 'Desde' es obligatoria.");
-            }
-            if (hasta == null) {
-                return ResponseEntity.badRequest().body("La fecha 'Hasta' es obligatoria.");
-            }
+        GrillaDisponibilidadDTO grilla = gestorHabitaciones.obtenerEstados(desde, hasta, tipo);
 
-            GrillaDisponibilidadDTO grilla = gestorHabitaciones.obtenerEstados(desde, hasta, tipo);
-            return ResponseEntity.ok(grilla);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("Error de validación: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error interno", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error interno en el servidor.");
-        }
+        return ResponseEntity.ok(grilla);
     }
 
     @GetMapping("/reserva-detalle")

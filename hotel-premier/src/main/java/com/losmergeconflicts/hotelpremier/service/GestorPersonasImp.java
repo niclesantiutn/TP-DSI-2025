@@ -234,10 +234,11 @@ public class GestorPersonasImp implements GestorPersonas {
      * Busca huéspedes en el sistema según múltiples criterios.
      *
      * Proceso (mapeado al Diagrama de Secuencia):
-     * 1. Llama al HuespedDAO con los criterios (llamada a HuespedDAOImp)
-     * 2. Recibe la lista de entidades Huesped
-     * 3. Mapea la lista de Huesped a HuespedDTOResponse (el "loop" del diagrama)
-     * 4. Retorna la lista de DTOs
+     * 1. Sanitiza los criterios de entrada (Mayúsculas, solo números, etc.)
+     * 2. Llama al HuespedDAO con los criterios (llamada a HuespedDAOImp)
+     * 3. Recibe la lista de entidades Huesped
+     * 4. Mapea la lista de Huesped a HuespedDTOResponse (el "loop" del diagrama)
+     * 5. Retorna la lista de DTOs
      *
      * @param apellido Criterio de búsqueda por apellido
      * @param nombre Criterio de búsqueda por nombre
@@ -248,6 +249,18 @@ public class GestorPersonasImp implements GestorPersonas {
     @Override
     @Transactional(readOnly = true)
     public List<HuespedDTOResponse> buscarHuespedes(String apellido, String nombre, TipoDocumento tipoDoc, String nroDoc) {
+
+        if (apellido != null) {
+            // A mayúsculas y solo permite letras, eñes y espacios
+            apellido = apellido.toUpperCase().replaceAll("[^A-ZÑ ]", "");
+        }
+        if (nombre != null) {
+            nombre = nombre.toUpperCase().replaceAll("[^A-ZÑ ]", "");
+        }
+        if (nroDoc != null) {
+            // Solo permite números
+            nroDoc = nroDoc.replaceAll("[^0-9]", "");
+        }
 
         log.info("Iniciando búsqueda de huéspedes con criterios: Apellido [{}], Nombre [{}], TipoDoc [{}], NroDoc [{}]",
                 apellido, nombre, tipoDoc, nroDoc);

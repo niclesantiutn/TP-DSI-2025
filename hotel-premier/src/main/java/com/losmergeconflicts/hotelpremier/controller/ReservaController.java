@@ -1,12 +1,10 @@
 package com.losmergeconflicts.hotelpremier.controller;
 
+import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.losmergeconflicts.hotelpremier.dto.ReservaDTORequest;
 import com.losmergeconflicts.hotelpremier.dto.ReservaDTOResponse;
@@ -32,7 +30,7 @@ public class ReservaController {
 
     /**
      * Registra una reserva en el sistema.
-     * 
+     *
      * @param request DTO con los datos de la reserva
      * @return ResponseEntity con la reserva registrada
      */
@@ -48,4 +46,5 @@ public class ReservaController {
         ReservaDTOResponse nuevaReserva = gestorReservas.registrarReserva(request);
         return new ResponseEntity<>(nuevaReserva, HttpStatus.CREATED);
     }
+
 }

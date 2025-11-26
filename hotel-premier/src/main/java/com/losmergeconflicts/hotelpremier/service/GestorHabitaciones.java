@@ -1,9 +1,6 @@
 package com.losmergeconflicts.hotelpremier.service;
 
-import com.losmergeconflicts.hotelpremier.dto.DetalleReservaDTO;
-import com.losmergeconflicts.hotelpremier.dto.GrillaDisponibilidadDTO;
-import com.losmergeconflicts.hotelpremier.dto.HabitacionDTO;
-import com.losmergeconflicts.hotelpremier.dto.HabitacionDTOResponse;
+import com.losmergeconflicts.hotelpremier.dto.*;
 import com.losmergeconflicts.hotelpremier.entity.Habitacion;
 import com.losmergeconflicts.hotelpremier.entity.TipoHabitacion;
 
@@ -12,9 +9,11 @@ import java.util.List;
 
 public interface GestorHabitaciones {
 
-    void modificarHabitacion(HabitacionDTO habitacionDTO);
-    Habitacion buscarHabitacion(int id);
-    List<Habitacion> listarHabitaciones();
+    HabitacionDTOResponse modificarHabitacion(Long id, HabitacionDTORequest request);
+
+    HabitacionDTOResponse buscarHabitacion(Long id);
+
+    List<HabitacionDTOResponse> listarHabitaciones();
 
     GrillaDisponibilidadDTO obtenerEstados(LocalDate desde, LocalDate hasta, TipoHabitacion tipo);
 

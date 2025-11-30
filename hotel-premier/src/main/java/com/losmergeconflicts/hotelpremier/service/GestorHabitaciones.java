@@ -1,7 +1,6 @@
 package com.losmergeconflicts.hotelpremier.service;
 
 import com.losmergeconflicts.hotelpremier.dto.*;
-import com.losmergeconflicts.hotelpremier.entity.Habitacion;
 import com.losmergeconflicts.hotelpremier.entity.TipoHabitacion;
 
 import java.time.LocalDate;

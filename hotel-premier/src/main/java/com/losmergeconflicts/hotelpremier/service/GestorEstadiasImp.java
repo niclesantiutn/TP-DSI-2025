@@ -8,6 +8,7 @@ import com.losmergeconflicts.hotelpremier.dto.EstadiaDTORequest;
 import com.losmergeconflicts.hotelpremier.entity.Estadia;
 import com.losmergeconflicts.hotelpremier.entity.Habitacion;
 import com.losmergeconflicts.hotelpremier.entity.Huesped;
+import com.losmergeconflicts.hotelpremier.entity.TipoEstadoHabitacion;
 import com.losmergeconflicts.hotelpremier.mapper.EstadiaMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,39 +36,19 @@ public class GestorEstadiasImp implements GestorEstadias {
     @Transactional
     public EstadiaDTOResponse registrarOcupacion(EstadiaDTORequest request) {
 
-        // 1. BUSCAR LA HABITACIÓN
         Habitacion habitacion = habitacionDAO.findById(request.idHabitacion())
-                .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + request.idHabitacion()));
+                .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada"));
 
-        // 2. BUSCAR AL RESPONSABLE
         Huesped responsable = huespedDAO.findById(request.idResponsable())
-                .orElseThrow(() -> new EntityNotFoundException("Huésped responsable no encontrado con ID: " + request.idResponsable()));
+                .orElseThrow(() -> new EntityNotFoundException("Huésped responsable no encontrado"));
 
-        // 3. BUSCAR ACOMPAÑANTES
         List<Huesped> acompanantes = new ArrayList<>();
         if (request.idsAcompaniantes() != null && !request.idsAcompaniantes().isEmpty()) {
             acompanantes = huespedDAO.findAllById(request.idsAcompaniantes());
         }
 
-        // A) Validar que el responsable sea mayor de 18 años
-        int edadResponsable = Period.between(responsable.getFechaNacimiento(), LocalDate.now()).getYears();
-        if (edadResponsable < 18) {
-            throw new IllegalArgumentException("El Responsable de pago debe ser mayor de edad (tiene " + edadResponsable + " años).");
-        }
+        validarReglasNegocio(habitacion, responsable, acompanantes);
 
-        // B) Validar Capacidad de la Habitación: Total de personas = 1 (Responsable) + N (Acompañantes)
-        int cantidadPersonas = 1 + acompanantes.size();
-        int capacidadMaxima = obtenerCapacidadMaxima(habitacion.getTipoHabitacion()); // Método auxiliar abajo
-
-        if (cantidadPersonas > capacidadMaxima) {
-            throw new IllegalArgumentException(
-                    "La habitación " + habitacion.getTipoHabitacion() +
-                            " tiene capacidad máxima para " + capacidadMaxima +
-                            " personas. Ustedes son " + cantidadPersonas + "."
-            );
-        }
-
-        // 4. CREAR LA ESTADÍA
         LocalDateTime fechaIngreso = request.fechaIngreso().atTime(12, 0);
 
         Estadia nuevaEstadia = Estadia.builder()
@@ -76,15 +56,35 @@ public class GestorEstadiasImp implements GestorEstadias {
                 .fechaEgresoEsperado(request.fechaEgreso())
                 .habitacion(habitacion)
                 .huespedAsignado(responsable)
-                .huespedesAcompaniantes(acompanantes)
                 .itemsConsumo(new ArrayList<>())
                 .build();
 
-        // 5. GUARDAR
         Estadia estadiaGuardada = estadiaDAO.save(nuevaEstadia);
-        log.info("Estadía registrada con ID: {}", estadiaGuardada.getId());
+
+        if (!acompanantes.isEmpty()) {
+            for (Huesped a : acompanantes) {
+                log.info("Registrando acompañante: {}", a.getApellido());
+                estadiaDAO.registrarAcompanante(estadiaGuardada.getId(), a.getId());
+            }
+        }
+
+        habitacionDAO.actualizarEstado(habitacion.getId(), TipoEstadoHabitacion.OCUPADA);
 
         return estadiaMapper.toResponse(estadiaGuardada);
+    }
+
+    private void validarReglasNegocio(Habitacion habitacion, Huesped responsable, List<Huesped> acompanantes) {
+        int edadResponsable = Period.between(responsable.getFechaNacimiento(), LocalDate.now()).getYears();
+        if (edadResponsable < 18) {
+            throw new IllegalArgumentException("El Responsable debe ser mayor de edad.");
+        }
+
+        int cantidadPersonas = 1 + acompanantes.size();
+        int capacidadMaxima = obtenerCapacidadMaxima(habitacion.getTipoHabitacion());
+
+        if (cantidadPersonas > capacidadMaxima) {
+            throw new IllegalArgumentException("Capacidad excedida. Máximo: " + capacidadMaxima);
+        }
     }
 
     private int obtenerCapacidadMaxima(com.losmergeconflicts.hotelpremier.entity.TipoHabitacion tipo) {
@@ -101,3 +101,5 @@ public class GestorEstadiasImp implements GestorEstadias {
         };
     }
 }
+
+

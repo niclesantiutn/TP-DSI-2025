@@ -122,7 +122,8 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group input:invalid { border-color: #dc3545;
+        .form-group input:invalid {
+            border-color: #dc3545;
             box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
         }
 
@@ -240,6 +241,35 @@
         .results-table th:hover .sort-icon {
             color: #999;
         }
+
+        .confirmation-dialog {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center; align-items: center;
+            z-index: 10000;
+        }
+
+        .confirmation-dialog.active { display: flex; }
+
+        .confirmation-content {
+            background: white; border-radius: 8px; padding: 30px;
+            max-width: 400px; width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); text-align: center;
+        }
+
+        .confirmation-content h3 {
+            color: #d97706;
+            margin: 0 0 15px 0; font-size: 20px; font-weight: bold;
+        }
+
+        .confirmation-content p {
+            color: #555; font-size: 15px; margin-bottom: 25px;
+        }
+
+        .confirmation-buttons {
+            display: flex; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -270,16 +300,18 @@
                 <div class="form-group">
                     <label>APELLIDO</label>
                     <input type="text" id="apellido" name="apellido"
-                           pattern="[A-ZÑ ]*"
-                           title="Solo se permiten letras mayúsculas, espacios y Ñ"
-                           oninput="this.value = this.value.toUpperCase().replace(/[^A-ZÑ ]/g, '')">
+                           maxlength="100"
+                           pattern="[A-ZÑÁÉÍÓÚÜ\s]*"
+                           title="Solo se permiten letras y espacios"
+                           oninput="this.value = this.value.toUpperCase().replace(/[^A-ZÑÁÉÍÓÚÜ\s]/g, '')">
                 </div>
                 <div class="form-group">
                     <label>NOMBRES</label>
                     <input type="text" id="nombre" name="nombre"
-                           pattern="[A-ZÑ ]*"
-                           title="Solo se permiten letras mayúsculas, espacios y Ñ"
-                           oninput="this.value = this.value.toUpperCase().replace(/[^A-ZÑ ]/g, '')">
+                           maxlength="100"
+                           pattern="[A-ZÑÁÉÍÓÚÜ\s]*"
+                           title="Solo se permiten letras y espacios"
+                           oninput="this.value = this.value.toUpperCase().replace(/[^A-ZÑÁÉÍÓÚÜ\s]/g, '')">
                 </div>
                 <div class="form-group">
                     <label>TIPO DOCUMENTO</label>
@@ -295,8 +327,9 @@
                 <div class="form-group">
                     <label>NÚMERO DOCUMENTO</label>
                     <input type="text" id="documento" name="documento"
+                           maxlength="8"
                            pattern="[0-9]*"
-                           title="Solo se permiten números"
+                           title="Solo se permiten números (máximo 8 dígitos)"
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
             </div>
@@ -331,10 +364,20 @@
 
             <div class="form-actions">
                 <button type="button" id="btnBuscar" class="btn btn-primary">BUSCAR</button>
-                <button type="submit" class="btn btn-primary">SIGUIENTE</button>
+                <button type="button" id="btnSiguiente" class="btn btn-primary">SIGUIENTE</button>
                 <a th:href="@{/menu-principal}" class="btn btn-secondary">CANCELAR</a>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="modalAdvertencia" class="confirmation-dialog">
+    <div class="confirmation-content">
+        <h3>⚠️ Atención</h3>
+        <p>Debe seleccionar un huésped de la lista para continuar.</p>
+        <div class="confirmation-buttons">
+            <button type="button" class="btn btn-primary" onclick="cerrarModalAdvertencia()">ENTENDIDO</button>
+        </div>
     </div>
 </div>
 
@@ -343,6 +386,7 @@
         const btnBuscar = document.getElementById('btnBuscar');
         const tablaResultados = document.getElementById('tablaResultados');
         const noResultados = document.getElementById('noResultados');
+        const btnSiguiente = document.getElementById('btnSiguiente');
 
         let resultadosGlobales = [];
         let ordenActual = { columna: null, direccion: 'asc' };
@@ -352,11 +396,24 @@
             realizarBusqueda();
         });
 
+        btnSiguiente.addEventListener('click', function() {
+            const seleccionado = document.querySelector('input[name="huespedId"]:checked');
+            if (!seleccionado) {
+                document.getElementById('modalAdvertencia').classList.add('active');
+                return;
+            }
+            document.getElementById('formBusqueda').submit();
+        });
+
+        window.cerrarModalAdvertencia = function() {
+            document.getElementById('modalAdvertencia').classList.remove('active');
+        };
+
         function realizarBusqueda() {
-            const apellido = document.getElementById('apellido').value;
-            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
             const tipoDocumento = document.getElementById('tipoDocumento').value;
-            const documento = document.getElementById('documento').value;
+            const documento = document.getElementById('documento').value.trim();
 
             const params = new URLSearchParams();
             if (apellido) params.append('apellido', apellido);
@@ -373,9 +430,20 @@
                     return response.json();
                 })
                 .then(huespedes => {
-                    resultadosGlobales = huespedes;
-                    resetearIconos();
-                    mostrarResultados(resultadosGlobales);
+                    if (huespedes.length === 0) {
+                        resultadosGlobales = [];
+                        document.getElementById('tablaResultados').innerHTML = '';
+                        document.getElementById('noResultados').style.display = 'block';
+
+                        setTimeout(function() {
+                            window.location.href = '/huesped/alta';
+                        }, 2000);
+
+                    } else {
+                        resultadosGlobales = huespedes;
+                        resetearIconos();
+                        mostrarResultados(resultadosGlobales);
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);

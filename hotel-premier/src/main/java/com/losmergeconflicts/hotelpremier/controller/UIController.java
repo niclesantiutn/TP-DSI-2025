@@ -217,11 +217,11 @@ public class UIController {
     }
 
     @Operation(summary = "Mostrar estado de habitaciones",
-            description = "Muestra la grilla. El botón cambia entre RESERVAR y OCUPAR.",
+            description = "Muestra la grilla. Contextos: 'reservar', 'ocupar' o 'ver'.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Vista mostrada"),
                     @ApiResponse(responseCode = "401", description = "No autenticado")
-            })
+    })
     @GetMapping("/habitacion/estado")
     public String mostrarEstadoHabitaciones(
             @RequestParam(name = "contexto", defaultValue = "reservar") String contexto,
@@ -229,11 +229,28 @@ public class UIController {
 
         log.info("UI: Estado Habitaciones. Contexto: {}", contexto);
 
-        model.addAttribute("contexto", contexto); // Pasa 'reservar' u 'ocupar'
+        model.addAttribute("contexto", contexto);
         model.addAttribute("tiposHabitacion", TipoHabitacion.values());
 
-        String textoBoton = "reservar".equalsIgnoreCase(contexto) ? "RESERVAR" : "OCUPAR";
+        String textoBoton = "";
+        boolean modoConsulta = false;
+
+        switch (contexto.toLowerCase()) {
+            case "ocupar":
+                textoBoton = "OCUPAR";
+                break;
+            case "ver":
+                modoConsulta = true;
+                textoBoton = "";
+                break;
+            case "reservar":
+            default:
+                textoBoton = "RESERVAR";
+                break;
+        }
+
         model.addAttribute("textoBoton", textoBoton);
+        model.addAttribute("modoConsulta", modoConsulta);
 
         return "estado-habitaciones";
     }

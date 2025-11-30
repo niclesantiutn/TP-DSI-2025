@@ -82,8 +82,6 @@
             max-width: 500px; width: 90%;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); text-align: center;
         }
-
-        /* Se eliminó el CSS viejo del modal específico para usar el genérico */
     </style>
 </head>
 <body>
@@ -140,7 +138,7 @@
         <table class="w-full text-center border-collapse bg-white">
             <thead class="text-gray-700 uppercase text-xs font-bold sticky-header">
             <tr id="headerRow">
-                <th class="p-3 sticky-col min-w-[120px] shadow-sm text-gray-600 bg-gray-100 z-40">DÍAS</th>
+                <th class="p-3 sticky-col border border-gray-300 shadow-sm bg-gray-100 z-40 text-gray-600">DÍAS</th>
             </tr>
             </thead>
             <tbody id="bodyRows" class="text-sm">
@@ -175,13 +173,17 @@
     </div>
 
     <div class="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-4">
+
         <button id="btnAccion"
                 class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed uppercase"
-                th:text="${textoBoton}" disabled>
+                th:text="${textoBoton}"
+                th:unless="${modoConsulta}"
+                disabled>
         </button>
 
-        <a href="/menu-principal" class="btn btn-secondary uppercase flex items-center">
-            Cancelar
+        <a href="/menu-principal"
+           th:class="${modoConsulta} ? 'btn btn-primary uppercase flex items-center' : 'btn btn-secondary uppercase flex items-center'"
+           th:text="${modoConsulta} ? 'VOLVER' : 'CANCELAR'">
         </a>
     </div>
 
@@ -262,7 +264,10 @@
             const data = await res.json();
             gridDataGlobal = data;
             renderizar(data);
-            btnAccion.disabled = false;
+
+            if (btnAccion) {
+                btnAccion.disabled = false;
+            }
 
         } catch (e) {
             console.error(e);
@@ -274,7 +279,7 @@
     function renderizar(data) {
         const header = document.getElementById('headerRow');
         const body = document.getElementById('bodyRows');
-        window.habitacionesMap = data.idsHabitaciones; // Guardar mapa global
+        window.habitacionesMap = data.idsHabitaciones;
 
         header.innerHTML = '<th class="p-3 sticky-col border border-gray-300 shadow-sm bg-gray-100 z-40 text-gray-600">DÍAS</th>';
 
@@ -316,13 +321,16 @@
     function gestionarClickCelda(celda, nombreHab, fechaClickeada, estadoClickeado) {
         const contexto = "[[${contexto}]]";
 
+        if (contexto === 'ver') {
+            return;
+        }
+
         if (contexto === 'reservar') {
             seleccionarColumna(nombreHab);
             return;
         }
 
         if (contexto === 'ocupar') {
-
             let tieneReserva = false;
             let fechaDeLaReserva = null;
             let estaOcupada = false;
@@ -381,69 +389,68 @@
     }
 
     // --- 4. Botón Acción Principal ---
-    btnAccion.addEventListener('click', () => {
-        const contexto = "[[${contexto}]]";
-        const celdasSeleccionadas = document.querySelectorAll('td.seleccionada');
+    if (btnAccion) {
+        btnAccion.addEventListener('click', () => {
+            const contexto = "[[${contexto}]]";
+            const celdasSeleccionadas = document.querySelectorAll('td.seleccionada');
 
-        if (celdasSeleccionadas.length === 0) {
-            mostrarError("Debe seleccionar al menos una habitación.", null);
-            return;
-        }
+            if (celdasSeleccionadas.length === 0) {
+                mostrarError("Debe seleccionar al menos una habitación.", null);
+                return;
+            }
 
-        if (contexto === 'reservar') {
-            // Validación Disponibilidad
-            let hayConflicto = false;
-            for (let celda of celdasSeleccionadas) {
-                if (celda.getAttribute('data-estado') !== 'LIBRE') {
-                    hayConflicto = true;
-                    break;
+            if (contexto === 'reservar') {
+                let hayConflicto = false;
+                for (let celda of celdasSeleccionadas) {
+                    if (celda.getAttribute('data-estado') !== 'LIBRE') {
+                        hayConflicto = true;
+                        break;
+                    }
                 }
+
+                if (hayConflicto) {
+                    document.getElementById('availabilityModal').classList.add('active');
+                    return;
+                }
+
+                const idsHabitaciones = [...new Set(Array.from(celdasSeleccionadas).map(td => td.dataset.habitacionId))];
+
+                sessionStorage.setItem('reservaData', JSON.stringify({
+                    idsHabitaciones: idsHabitaciones.map(id => parseInt(id)),
+                    fechaIngreso: inputDesde.value,
+                    fechaEgreso: inputHasta.value
+                }));
+
+                window.location.href = '/reserva/confirmar';
+
+            } else if (contexto === 'ocupar') {
+                const idHabitacion = celdasSeleccionadas[0].dataset.habitacionId;
+                const nombreHabitacion = celdasSeleccionadas[0].dataset.habitacion;
+
+                let ocupada = false;
+                celdasSeleccionadas.forEach(td => {
+                    if (td.dataset.estado === 'OCUPADA') ocupada = true;
+                });
+
+                if (ocupada) {
+                    alert("No puede ocupar una habitación que ya está ocupada.");
+                    return;
+                }
+
+                const dataOcupacion = {
+                    idHabitacion: parseInt(idHabitacion),
+                    nombreHabitacion: nombreHabitacion,
+                    fechaIngreso: inputDesde.value,
+                    fechaEgreso: inputHasta.value
+                };
+
+                sessionStorage.setItem('ocupacionData', JSON.stringify(dataOcupacion));
+                window.location.href = '/habitacion/ocupar';
             }
-
-            if (hayConflicto) {
-                document.getElementById('availabilityModal').classList.add('active');
-                return;
-            }
-
-            const idsHabitaciones = [...new Set(Array.from(celdasSeleccionadas).map(td => td.dataset.habitacionId))];
-
-            sessionStorage.setItem('reservaData', JSON.stringify({
-                idsHabitaciones: idsHabitaciones.map(id => parseInt(id)),
-                fechaIngreso: inputDesde.value,
-                fechaEgreso: inputHasta.value
-            }));
-
-            window.location.href = '/reserva/confirmar';
-
-        } else if (contexto === 'ocupar') {
-            // Lógica para 'Ocupar' (caso normal, habitación LIBRE)
-            const idHabitacion = celdasSeleccionadas[0].dataset.habitacionId;
-            const nombreHabitacion = celdasSeleccionadas[0].dataset.habitacion;
-
-            let ocupada = false;
-            celdasSeleccionadas.forEach(td => {
-                if (td.dataset.estado === 'OCUPADA') ocupada = true;
-            });
-
-            if (ocupada) {
-                alert("No puede ocupar una habitación que ya está ocupada.");
-                return;
-            }
-
-            const dataOcupacion = {
-                idHabitacion: parseInt(idHabitacion),
-                nombreHabitacion: nombreHabitacion,
-                fechaIngreso: inputDesde.value,
-                fechaEgreso: inputHasta.value
-            };
-
-            sessionStorage.setItem('ocupacionData', JSON.stringify(dataOcupacion));
-            window.location.href = '/habitacion/ocupar';
-        }
-    });
+        });
+    }
 
     // --- Modales y Utilidades ---
-    // Versión robusta para evitar errores si la API falla o el nombre tiene espacios
     async function mostrarModalReserva(nombre, fecha) {
         let datos = {
             apellido: "NO DISPONIBLE",
@@ -452,25 +459,18 @@
         };
 
         try {
-            // Usamos encodeURIComponent por si el nombre tiene espacios
             const res = await fetch(`/api/habitaciones/reserva-detalle?nombre=${encodeURIComponent(nombre)}&fecha=${fecha}`);
-
             if (res.ok) {
                 datos = await res.json();
-            } else {
-                console.warn("El backend no devolvió detalles, usando valores por defecto.");
             }
-
         } catch (e) {
             console.error("Error de conexión:", e);
         }
 
-        // 1. Llenar el modal
         document.getElementById('modalApellido').textContent = datos.apellido || 'Sin Datos';
         document.getElementById('modalNombre').textContent = datos.nombre || '';
         document.getElementById('modalTelefono').textContent = datos.telefono || '';
 
-        // 2. Configurar Botón: OCUPAR IGUAL
         const btnOcuparIgual = document.getElementById('btnOcuparIgual');
         const newBtnOcupar = btnOcuparIgual.cloneNode(true);
         btnOcuparIgual.parentNode.replaceChild(newBtnOcupar, btnOcuparIgual);
@@ -486,7 +486,6 @@
             window.location.href = '/habitacion/ocupar';
         };
 
-        // 3. Configurar Botón: VOLVER
         const btnVolver = document.getElementById('btnVolverReserva');
         const newBtnVolver = btnVolver.cloneNode(true);
         btnVolver.parentNode.replaceChild(newBtnVolver, btnVolver);
@@ -496,7 +495,6 @@
             seleccionarColumna(nombre);
         };
 
-        // 4. Mostrar el Modal
         document.getElementById('modalReserva').classList.add('active');
     }
 
@@ -518,7 +516,10 @@
 
     function limpiarTabla() {
         document.getElementById('bodyRows').innerHTML = '<tr><td colspan="10" class="p-12 text-gray-400 italic text-center">Corrija los errores.</td></tr>';
-        btnAccion.disabled = true;
+
+        if (btnAccion) {
+            btnAccion.disabled = true;
+        }
     }
 </script>
 </body>

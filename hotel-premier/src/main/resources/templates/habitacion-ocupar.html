@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Ocupar Habitación - Selección de Huéspedes</title>
     <style>
-
+        /* --- ESTILOS GENERALES Y LAYOUT --- */
         body {
             font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -34,40 +34,36 @@
             margin-bottom: 20px;
         }
 
-        /* ESTILOS DE BOTONES */
+        /* --- BOTONES --- */
         .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; transition: background 0.2s; }
         .btn-primary { background: #667eea; }
         .btn-primary:hover { background: #5a6fd6; }
-
         .btn-success { background: #28a745; }
         .btn-success:hover { background: #218838; }
-
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #c82333; }
-
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
-
         .btn-add { background: #17a2b8; color: white; }
         .btn-add:hover { background: #138496; }
 
+        /* --- LISTAS --- */
         .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .list-box { border: 1px solid #ddd; border-radius: 4px; padding: 10px; min-height: 150px; background: #fff; }
         .list-header { font-weight: bold; margin-bottom: 10px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-
         .selected-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 5px; border-radius: 4px; border: 1px solid transparent; }
 
+        /* --- TABLA --- */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #f8f9fa; color: #444; }
         tr:hover { background-color: #f8f9fa; }
 
-        /* ESTILOS DEL MODAL (Popup) */
+        /* --- MODALES --- */
         .confirmation-dialog {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.6);
-            display: none; /* Oculto por defecto */
-            justify-content: center; align-items: center;
+            display: none; justify-content: center; align-items: center;
             z-index: 10000;
         }
         .confirmation-dialog.active { display: flex; }
@@ -78,19 +74,17 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); text-align: center;
         }
 
-        /* Estilo específico para el modal de éxito (Verde) */
+        /* Modal Éxito */
         .success-dialog { background-color: #d4edda; border: 2px solid #28a745; }
         .success-dialog h3 { color: #155724; margin: 0 0 15px 0; font-size: 24px; }
         .success-dialog p { color: #155724; font-weight: 500; font-size: 16px; margin-bottom: 20px; }
 
-        .confirmation-buttons { display: flex; justify-content: center; }
-        .confirmation-buttons .btn { min-width: 100px; }
-
-        /* Estilo específico para el modal de Error (Rojo Suave) */
+        /* Modal Error */
         .error-dialog { background-color: #f8d7da; border: 2px solid #dc3545; }
         .error-dialog h3 { color: #721c24; margin: 0 0 15px 0; font-size: 24px; }
         .error-dialog p { color: #721c24; font-weight: 500; font-size: 16px; margin-bottom: 20px; }
 
+        .confirmation-buttons { display: flex; justify-content: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -130,8 +124,9 @@
         </div>
 
         <div style="margin-top: 30px; text-align: right; border-top: 1px solid #eee; padding-top: 20px;">
-            <button class="btn btn-secondary" onclick="window.history.back()" style="margin-right: 10px;">VOLVER</button>
-            <button class="btn btn-success" onclick="confirmarOcupacion()">CONFIRMAR OCUPACIÓN</button>
+            <button class="btn btn-secondary" onclick="window.history.back()" style="margin-right: 10px;">CANCELAR</button>
+
+            <button class="btn btn-success" onclick="confirmarOcupacion()">ACEPTAR</button>
         </div>
 
         <div id="errorDialog" class="confirmation-dialog">
@@ -148,38 +143,41 @@
 </div>
 
 <div id="successDialog" class="confirmation-dialog">
-    <div class="confirmation-content success-dialog">
-        <h3>¡Éxito!</h3>
-        <p>¡Ocupación registrada exitosamente!</p>
-        <div class="confirmation-buttons">
-            <button type="button" class="btn btn-success" id="btnSuccessOk">ACEPTAR</button>
+    <div class="confirmation-content success-dialog" style="max-width: 500px;">
+        <h3>¡Operación Exitosa!</h3>
+        <p>La ocupación se ha registrado correctamente.</p>
+
+        <div class="confirmation-buttons" style="flex-direction: column; gap: 15px; margin-top: 20px;">
+            <button type="button" class="btn btn-success" onclick="accionSeguirCargando()">
+                SEGUIR CARGANDO
+            </button>
+
+            <button type="button" class="btn btn-primary" onclick="accionCargarOtra()">
+                CARGAR OTRA HABITACIÓN
+            </button>
+
+            <button type="button" class="btn btn-secondary" onclick="accionSalir()">
+                SALIR
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 1. Inicialización y Event Listeners de Validación ---
+    // --- 1. Inicialización y Event Listeners ---
     document.addEventListener('DOMContentLoaded', function() {
-        // Validar Apellido y Nombre: Solo letras y espacios, convertir a mayúsculas
+        // Validaciones de input
         ['busquedaApellido', 'busquedaNombre'].forEach(id => {
             const input = document.getElementById(id);
             input.addEventListener('input', function() {
-                // Reemplaza todo lo que NO sea letra (incluyendo acentos y ñ) o espacio por vacío
                 let valorLimpio = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
                 this.value = valorLimpio.toUpperCase();
             });
         });
 
-        // Validar Documento: Solo números
         const docInput = document.getElementById('busquedaDoc');
         docInput.addEventListener('input', function() {
-            // Reemplaza todo lo que NO sea número por vacío
             this.value = this.value.replace(/[^0-9]/g, '');
-        });
-
-        // Configurar botón del Modal de Éxito
-        document.getElementById('btnSuccessOk').addEventListener('click', function() {
-            window.location.href = '/menu-principal';
         });
     });
 
@@ -191,15 +189,13 @@
         window.location.href = '/menu-principal';
     }
 
-    // Mostrar info en la cabecera
     document.getElementById('infoHabitacion').textContent =
         `Habitación: ${ocupacionData.nombreHabitacion} | Desde: ${ocupacionData.fechaIngreso} | Hasta: ${ocupacionData.fechaEgreso}`;
 
-    // Variables de estado
     let responsable = null;
     let acompanantes = [];
 
-    // --- FUNCIÓN DE BÚSQUEDA ---
+    // --- BÚSQUEDA ---
     async function buscarHuespedes() {
         const apellido = document.getElementById('busquedaApellido').value;
         const nombre = document.getElementById('busquedaNombre').value;
@@ -211,14 +207,8 @@
         if(doc) params.append('documento', doc);
 
         try {
-            const res = await fetch('/api/personas/huesped/buscar?' + params.toString(), {
-                method: 'POST'
-            });
-
-            if (!res.ok) {
-                console.error("Error API:", res.status);
-                return;
-            }
+            const res = await fetch('/api/personas/huesped/buscar?' + params.toString(), { method: 'POST' });
+            if (!res.ok) return;
 
             const data = await res.json();
             const tbody = document.querySelector('#tablaResultados tbody');
@@ -231,7 +221,6 @@
 
             data.forEach(h => {
                 const jsonString = JSON.stringify(h).replace(/"/g, '&quot;');
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                         <td>${h.apellido}</td>
@@ -248,17 +237,16 @@
             });
         } catch (error) {
             console.error(error);
-            alert("Error al buscar huéspedes.");
+            mostrarModalError("Error al buscar huéspedes.");
         }
     }
 
-    // --- SELECCIONAR RESPONSABLE ---
+    // --- SELECCIÓN ---
     function seleccionarResponsable(huesped) {
         if (acompanantes.some(a => a.id === huesped.id)) {
-            alert("Esta persona ya está en la lista de acompañantes. Quítela de allí primero.");
+            mostrarModalError("Esta persona ya está como acompañante.");
             return;
         }
-
         responsable = huesped;
         const div = document.getElementById('responsableSeleccionado');
         div.innerHTML = `
@@ -271,33 +259,26 @@
             `;
     }
 
-    // --- AGREGAR ACOMPAÑANTE ---
     function agregarAcompanante(huesped) {
         if (responsable && responsable.id === huesped.id) {
-            alert("Esta persona ya es el Responsable titular.");
+            mostrarModalError("Esta persona ya es el Responsable titular.");
             return;
         }
-
-        const yaExiste = acompanantes.some(a => a.id === huesped.id);
-        if (yaExiste) {
-            alert("Esta persona ya está agregada como acompañante.");
+        if (acompanantes.some(a => a.id === huesped.id)) {
+            mostrarModalError("Esta persona ya está agregada.");
             return;
         }
-
         acompanantes.push(huesped);
         renderAcompanantes();
     }
 
-    // --- RENDERIZAR LISTA ---
     function renderAcompanantes() {
         const container = document.getElementById('listaAcompanantes');
         container.innerHTML = '';
-
         acompanantes.forEach((a, index) => {
             const div = document.createElement('div');
             div.className = 'selected-item';
             div.style.cssText = "background: #e0f2f1; border: 1px solid #b2dfdb; padding: 8px;";
-
             div.innerHTML = `
                     <span style="color: #00695c; font-weight: 500;">${a.apellido}, ${a.nombre}</span>
                     <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.7em;"
@@ -312,10 +293,9 @@
         renderAcompanantes();
     }
 
-    // --- CONFIRMAR OCUPACIÓN ---
+    // --- CONFIRMAR OCUPACIÓN (Acción del botón SALIR) ---
     async function confirmarOcupacion() {
         if (!responsable) {
-            // Usamos el nuevo modal incluso para validaciones locales
             mostrarModalError("Debe seleccionar un Responsable de Pago (Huésped Titular).");
             return;
         }
@@ -336,17 +316,10 @@
             });
 
             if (res.ok) {
-                // ÉXITO: Limpiar datos y mostrar Modal Verde
-                sessionStorage.removeItem('ocupacionData');
                 document.getElementById('successDialog').classList.add('active');
             } else {
-                // ERROR: Leemos el mensaje del backend y mostramos Modal Rojo
                 const err = await res.json();
-
-                // Si el backend devuelve el mensaje en 'message', lo usamos.
-                // Si no, ponemos un genérico.
                 let mensajeServidor = err.message || "No se pudo registrar la ocupación.";
-
                 mostrarModalError(mensajeServidor);
             }
         } catch (e) {
@@ -355,6 +328,22 @@
         }
     }
 
+    // --- ACCIONES POST-CONFIRMACIÓN ---
+    function accionSeguirCargando() {
+        document.getElementById('successDialog').classList.remove('active');
+    }
+
+    function accionCargarOtra() {
+        sessionStorage.removeItem('ocupacionData');
+        window.location.href = '/habitacion/estado?contexto=ocupar';
+    }
+
+    function accionSalir() {
+        sessionStorage.removeItem('ocupacionData');
+        window.location.href = '/menu-principal';
+    }
+
+    // --- UTILIDADES MODAL ERROR ---
     function mostrarModalError(mensaje) {
         document.getElementById('textoError').textContent = mensaje;
         document.getElementById('errorDialog').classList.add('active');
@@ -363,7 +352,6 @@
     function cerrarModalError() {
         document.getElementById('errorDialog').classList.remove('active');
     }
-
 </script>
 </body>
 </html>

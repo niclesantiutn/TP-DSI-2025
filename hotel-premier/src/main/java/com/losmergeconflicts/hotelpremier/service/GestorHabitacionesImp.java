@@ -72,13 +72,31 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
             throw new IllegalArgumentException("Fecha Hasta inválida (anterior a Fecha Desde)");
         }
 
-        // 1. Obtener Habitaciones: Si tipo es NULL, trae todas.
         List<Habitacion> habitaciones;
         if (tipoHabitacion == null) {
-            habitaciones = habitacionDAO.findAllByOrderByNombreAsc();
+            habitaciones = habitacionDAO.findAll();
         } else {
-            habitaciones = habitacionDAO.findByTipoHabitacionOrderByNombreAsc(tipoHabitacion);
+            habitaciones = habitacionDAO.findByTipoHabitacion(tipoHabitacion);
         }
+
+        habitaciones.sort((h1, h2) -> {
+            String n1 = h1.getNombre();
+            String n2 = h2.getNombre();
+
+            String prefix1 = n1.replaceAll("[0-9]", "");
+            String prefix2 = n2.replaceAll("[0-9]", "");
+
+            int compPrefix = prefix1.compareTo(prefix2);
+            if (compPrefix != 0) return compPrefix;
+
+            try {
+                int num1 = Integer.parseInt(n1.replaceAll("[^0-9]", ""));
+                int num2 = Integer.parseInt(n2.replaceAll("[^0-9]", ""));
+                return Integer.compare(num1, num2);
+            } catch (NumberFormatException e) {
+                return n1.compareTo(n2);
+            }
+        });
 
         List<String> nombresHabitaciones = habitaciones.stream().map(Habitacion::getNombre).toList();
 
@@ -86,11 +104,11 @@ public class GestorHabitacionesImp implements GestorHabitaciones {
         Map<String, Long> idsHabitaciones = habitaciones.stream()
                 .collect(java.util.stream.Collectors.toMap(Habitacion::getNombre, Habitacion::getId));
 
-        // 2. Obtener Reservas y Estadías en el rango
+        // 2. Obtener Reservas y Estadías en el rango (EL RESTO SIGUE IGUAL...)
         List<Reserva> reservas = reservaDAO.findReservasEnRango(fechaDesde, fechaHasta);
         List<Estadia> estadias = estadiaDAO.findEstadiasEnRango(fechaDesde.atStartOfDay(), fechaHasta.atTime(23, 59));
 
-        // 3. Construir filas (Cada fila es UN DÍA)
+        // 3. Construir filas
         List<GrillaDisponibilidadDTO.FilaFechaDTO> filas = new ArrayList<>();
 
         LocalDate current = fechaDesde;

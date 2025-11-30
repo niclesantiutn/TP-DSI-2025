@@ -10,7 +10,5 @@ import java.util.List;
 @Repository
 public interface HabitacionDAO extends JpaRepository<Habitacion, Long> {
 
-    List<Habitacion> findAllByOrderByNombreAsc();
-
-    List<Habitacion> findByTipoHabitacionOrderByNombreAsc(TipoHabitacion tipoHabitacion);
+    List<Habitacion> findByTipoHabitacion(TipoHabitacion tipo);
 }

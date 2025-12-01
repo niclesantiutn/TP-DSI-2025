@@ -11,13 +11,13 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
+
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             padding: 15px 30px;
@@ -26,23 +26,23 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .navbar-brand {
             font-size: 24px;
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .navbar-user {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
+
         .user-info {
             color: #333;
         }
-        
+
         .btn-logout {
             padding: 8px 20px;
             background: #764ba2;
@@ -53,55 +53,55 @@
             text-decoration: none;
             font-size: 14px;
         }
-        
+
         .btn-logout:hover {
             background: #c82333;
         }
-        
+
         .container {
             max-width: 1000px;
             margin: 30px auto;
             padding: 0 20px;
         }
-        
+
         .content-card {
             background: white;
             border-radius: 8px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
-        
+
         .content-header {
             padding: 20px 30px;
             border-bottom: 1px solid #e0e0e0;
         }
-        
+
         .content-header h2 {
             font-size: 20px;
             font-weight: 600;
             color: #333;
             margin: 0;
         }
-        
+
         .content-body {
             padding: 25px 30px;
         }
-        
+
         .table-container {
             overflow-x: auto;
             margin-bottom: 20px;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-        
+
         thead {
             background-color: #f8f9fa;
         }
-        
+
         th {
             padding: 12px 15px;
             text-align: center;
@@ -111,18 +111,18 @@
             text-transform: uppercase;
             font-size: 12px;
         }
-        
+
         td {
             padding: 12px 15px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
             background-color: white;
         }
-        
+
         tbody tr:hover {
             background-color: #f1f3f5;
         }
-        
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -131,7 +131,7 @@
             padding-top: 20px;
             margin-top: 20px;
         }
-        
+
         .btn {
             padding: 8px 20px;
             border: none;
@@ -144,26 +144,25 @@
             display: inline-block;
             text-align: center;
         }
-        
+
         .btn-primary {
             background: #667eea;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: #5568d3;
         }
-        
+
         .btn-secondary {
             background: #e0e0e0;
             color: #333;
         }
-        
+
         .btn-secondary:hover {
             background: #d0d0d0;
         }
-        
-        /* Estilos para el modal de confirmación */
+
         .confirmation-dialog {
             position: fixed;
             top: 0;
@@ -176,11 +175,11 @@
             align-items: center;
             z-index: 10000;
         }
-        
+
         .confirmation-dialog.active {
             display: flex;
         }
-        
+
         .confirmation-content {
             background: white;
             border-radius: 8px;
@@ -190,40 +189,40 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
-        
+
         .confirmation-content h3 {
             margin: 0 0 15px 0;
             font-size: 18px;
             font-weight: 600;
             color: #333;
         }
-        
+
         .confirmation-content p {
             margin: 0 0 25px 0;
             font-size: 14px;
             color: #555;
             line-height: 1.5;
         }
-        
+
         .confirmation-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
         }
-        
+
         .confirmation-buttons .btn {
             min-width: 100px;
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 10px;
             }
-            
+
             table {
                 font-size: 11px;
             }
-            
+
             th, td {
                 padding: 8px 10px;
             }
@@ -231,163 +230,205 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <img th:src="@{/images/logo-hotel-premier.png}" alt="Hotel Premier" style="height: 40px; vertical-align: middle; margin-right: 10px;">
-            Hotel Premier
-        </div>
-        <div class="navbar-user">
+<nav class="navbar">
+    <div class="navbar-brand">
+        <i class="fas fa-hotel" style="margin-right: 10px;"></i>
+        Hotel Premier
+    </div>
+    <div class="navbar-user">
             <span class="user-info">
                 Bienvenido, <strong sec:authentication="name">Usuario</strong>
             </span>
-            <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="btn-logout">Cerrar Sesión</button>
-            </form>
-        </div>
-    </nav>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">Cerrar Sesión</button>
+        </form>
+    </div>
+</nav>
 
-    <div class="container">
-        <div class="content-card">
-            <div class="content-header">
-                <h2>RESERVAR HABITACIONES</h2>
+<div class="container">
+    <div class="content-card">
+        <div class="content-header">
+            <h2>RESERVAR HABITACIONES</h2>
+        </div>
+
+        <div class="content-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>HABITACIÓN</th>
+                        <th>TIPO DE HABITACIÓN</th>
+                        <th colspan="3">INGRESO</th>
+                        <th colspan="3">EGRESO</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>DÍA</th>
+                        <th>FECHA</th>
+                        <th>HORA</th>
+                        <th>DÍA</th>
+                        <th>FECHA</th>
+                        <th>HORA</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reservasBody">
+                    </tbody>
+                </table>
             </div>
-            
-            <div class="content-body">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>HABITACIÓN</th>
-                                <th>TIPO DE HABITACIÓN</th>
-                                <th colspan="3">INGRESO</th>
-                                <th colspan="3">EGRESO</th>
-                            </tr>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>DÍA</th>
-                                <th>FECHA</th>
-                                <th>HORA</th>
-                                <th>DÍA</th>
-                                <th>FECHA</th>
-                                <th>HORA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Los datos se cargarán dinámicamente con JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-primary" id="btnAceptar">ACEPTAR</button>
-                    <button type="button" class="btn btn-secondary" id="btnRechazar">RECHAZAR</button>
-                </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="btnAceptar">ACEPTAR</button>
+                <button type="button" class="btn btn-secondary" id="btnRechazar">RECHAZAR</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal de confirmación -->
-    <div id="confirmationDialog" class="confirmation-dialog">
-        <div class="confirmation-content">
-            <h3>Confirmación</h3>
-            <p>¿Está seguro que desea cancelar la reserva?</p>
-            <div class="confirmation-buttons">
-                <button type="button" class="btn btn-primary" id="btnConfirmarSi">SÍ</button>
-                <button type="button" class="btn btn-secondary" id="btnConfirmarNo">NO</button>
-            </div>
+<!-- Modal de Confirmación para Cancelar -->
+<div id="confirmationDialog" class="confirmation-dialog">
+    <div class="confirmation-content">
+        <h3>Confirmación</h3>
+        <p>¿Está seguro que desea cancelar la reserva?</p>
+        <div class="confirmation-buttons">
+            <button type="button" class="btn btn-primary" id="btnConfirmarSi">SÍ</button>
+            <button type="button" class="btn btn-secondary" id="btnConfirmarNo">NO</button>
         </div>
     </div>
+</div>
 
-    <script>
-        // Cargar datos desde sessionStorage
-        const reservaData = JSON.parse(sessionStorage.getItem('reservaData'));
-        
-        if (!reservaData || !reservaData.idsHabitaciones || reservaData.idsHabitaciones.length === 0) {
-            alert('No hay datos de reserva. Redirigiendo al menú principal...');
-            window.location.href = '/menu-principal';
-        }
+<script>
+    let reservaDataRaw = sessionStorage.getItem('reservaData');
+    let listaHabitacionesRequest = [];
 
-        const { idsHabitaciones, fechaIngreso, fechaEgreso } = reservaData;
+    try {
+        if (reservaDataRaw) {
+            const reservaData = JSON.parse(reservaDataRaw);
 
-        // Cargar habitaciones desde el backend
-        async function cargarHabitaciones() {
-            try {
-                const params = new URLSearchParams();
-                idsHabitaciones.forEach(id => params.append('ids', id));
-                
-                const response = await fetch(`/api/habitaciones/listar-por-ids?${params.toString()}`);
-                
-                if (!response.ok) {
-                    throw new Error('Error al cargar habitaciones');
-                }
-                
-                const habitaciones = await response.json();
-                renderizarTabla(habitaciones);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar los datos de las habitaciones');
-                window.location.href = '/menu-principal';
+            if (Array.isArray(reservaData)) {
+                listaHabitacionesRequest = reservaData;
+            } else {
+                listaHabitacionesRequest = [reservaData];
             }
         }
+    } catch (e) {
+        console.error("Error al parsear JSON", e);
+    }
 
-        function renderizarTabla(habitaciones) {
-            const tbody = document.querySelector('tbody');
-            tbody.innerHTML = '';
-            
-            const fechaIngresoObj = new Date(fechaIngreso + 'T00:00:00');
-            const fechaEgresoObj = new Date(fechaEgreso + 'T00:00:00');
-            
-            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    if (!listaHabitacionesRequest || listaHabitacionesRequest.length === 0) {
+        alert('No hay datos de reserva. Redirigiendo al menú principal...');
+        window.location.href = '/menu-principal';
+    }
+
+    async function cargarHabitaciones() {
+        try {
+            const ids = listaHabitacionesRequest.map(item => item.idHabitacion);
+            const params = new URLSearchParams();
+            ids.forEach(id => params.append('ids', id));
+
+            const response = await fetch(`/api/habitaciones/listar-por-ids?${params.toString()}`);
+
+            if (!response.ok) {
+                throw new Error('Error al cargar habitaciones');
+            }
+
+            const habitacionesBackend = await response.json();
+            renderizarTabla(habitacionesBackend);
+
+        } catch (error) {
+            console.error('Error al cargar los datos:', error);
+            alert('Error al cargar los datos de las habitaciones');
+            window.location.href = '/menu-principal';
+        }
+    }
+
+    function renderizarTabla(habitacionesBackend) {
+        const tbody = document.getElementById('reservasBody');
+        tbody.innerHTML = '';
+
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+        const mapHabitaciones = {};
+        habitacionesBackend.forEach(h => {
+            if (h.id !== undefined) mapHabitaciones[h.id] = h;
+            if (h.idHabitacion !== undefined) mapHabitaciones[h.idHabitacion] = h;
+            if (h.habitacionId !== undefined) mapHabitaciones[h.habitacionId] = h;
+        });
+
+        listaHabitacionesRequest.forEach(solicitud => {
+            let habitacionInfo = mapHabitaciones[solicitud.idHabitacion];
+
+            if (!habitacionInfo) {
+                for (let key in mapHabitaciones) {
+                    const hab = mapHabitaciones[key];
+                    if (hab.id === solicitud.idHabitacion ||
+                        hab.idHabitacion === solicitud.idHabitacion ||
+                        hab.habitacionId === solicitud.idHabitacion) {
+                        habitacionInfo = hab;
+                        break;
+                    }
+                }
+            }
+
+            const fechaIngresoObj = new Date(solicitud.fechaIngreso + 'T00:00:00');
+            const fechaEgresoObj = new Date(solicitud.fechaEgreso + 'T00:00:00');
+
             const diaIngreso = diasSemana[fechaIngresoObj.getDay()];
             const diaEgreso = diasSemana[fechaEgresoObj.getDay()];
-            
-            habitaciones.forEach(hab => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${hab.nombre || ''}</td>
-                    <td>${hab.tipoHabitacion || ''}</td>
-                    <td>${diaIngreso}</td>
-                    <td>${formatearFecha(fechaIngreso)}</td>
-                    <td>12:00</td>
-                    <td>${diaEgreso}</td>
-                    <td>${formatearFecha(fechaEgreso)}</td>
-                    <td>10:00</td>
-                `;
-                tbody.appendChild(row);
-            });
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${habitacionInfo ? (habitacionInfo.nombre || habitacionInfo.numero || 'N/A') : `Habitación ${solicitud.idHabitacion}`}</td>
+                <td>${habitacionInfo ? (habitacionInfo.tipoHabitacion || habitacionInfo.tipo || 'N/A') : 'No disponible'}</td>
+                <td>${diaIngreso}</td>
+                <td>${formatearFecha(solicitud.fechaIngreso)}</td>
+                <td>12:00</td>
+                <td>${diaEgreso}</td>
+                <td>${formatearFecha(solicitud.fechaEgreso)}</td>
+                <td>10:00</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (tbody.children.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No se pudieron cargar los datos de las habitaciones</td></tr>';
         }
+    }
 
-        function formatearFecha(fecha) {
-            const [y, m, d] = fecha.split('-');
-            return `${d}/${m}/${y}`;
+    function formatearFecha(fecha) {
+        if (!fecha) return '-';
+        const [y, m, d] = fecha.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    // Event Listeners
+    document.getElementById('btnAceptar').addEventListener('click', function() {
+        sessionStorage.setItem('reservaData', JSON.stringify(listaHabitacionesRequest));
+        window.location.href = '/reserva/datos-huesped';
+    });
+
+    document.getElementById('btnRechazar').addEventListener('click', function() {
+        document.getElementById('confirmationDialog').classList.add('active');
+    });
+
+    document.getElementById('btnConfirmarSi').addEventListener('click', function() {
+        sessionStorage.removeItem('reservaData');
+        window.location.href = '/menu-principal';
+    });
+
+    document.getElementById('btnConfirmarNo').addEventListener('click', function() {
+        document.getElementById('confirmationDialog').classList.remove('active');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const faLink = document.createElement('link');
+            faLink.rel = 'stylesheet';
+            faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            document.head.appendChild(faLink);
         }
-
-        // Event listeners para los botones
-        document.getElementById('btnAceptar').addEventListener('click', function() {
-            // Redirigir a la página de datos del huésped
-            window.location.href = '/reserva/datos-huesped';
-        });
-        
-        document.getElementById('btnRechazar').addEventListener('click', function() {
-            // Mostrar modal de confirmación
-            document.getElementById('confirmationDialog').classList.add('active');
-        });
-        
-        // Event listeners para el modal de confirmación
-        document.getElementById('btnConfirmarSi').addEventListener('click', function() {
-            // Limpiar sessionStorage y volver al menú
-            sessionStorage.removeItem('reservaData');
-            window.location.href = '/menu-principal';
-        });
-        
-        document.getElementById('btnConfirmarNo').addEventListener('click', function() {
-            // Cerrar el modal
-            document.getElementById('confirmationDialog').classList.remove('active');
-        });
-
-        // Cargar habitaciones al cargar la página
         cargarHabitaciones();
-    </script>
+    });
+</script>
 </body>
 </html>

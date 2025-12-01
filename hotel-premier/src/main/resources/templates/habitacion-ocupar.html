@@ -54,7 +54,13 @@
         .selected-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 5px; border-radius: 4px; border: 1px solid transparent; }
 
         /* --- TABLA --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #f8f9fa; color: #444; }
         tr:hover { background-color: #f8f9fa; }
@@ -105,10 +111,12 @@
                 <button class="btn btn-primary" onclick="buscarHuespedes()">BUSCAR</button>
             </div>
 
-            <table id="tablaResultados">
-                <thead><tr><th>Apellido</th><th>Nombre</th><th>Documento</th><th>Acción</th></tr></thead>
-                <tbody></tbody>
-            </table>
+            <div class="table-container">
+                <table id="tablaResultados">
+                    <thead><tr><th>Apellido</th><th>Nombre</th><th>Documento</th><th>Acción</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="lists-container">
@@ -255,8 +263,19 @@
                         <div style="font-weight:bold; color: #065f46;">${huesped.apellido}, ${huesped.nombre}</div>
                         <div style="font-size: 0.85em; color: #047857;">DNI: ${huesped.documento}</div>
                     </div>
+                    <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.7em;"
+                            onclick="quitarResponsable()">X</button>
                 </div>
             `;
+    }
+
+    function quitarResponsable() {
+        responsable = null;
+        const div = document.getElementById('responsableSeleccionado');
+        div.innerHTML = 'Ninguno seleccionado';
+        div.style.color = '#999';
+        div.style.fontStyle = 'italic';
+        div.style.padding = '10px';
     }
 
     function agregarAcompanante(huesped) {

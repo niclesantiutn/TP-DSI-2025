@@ -259,7 +259,7 @@
 <body>
 <nav class="navbar">
     <div class="navbar-brand">
-        <img th:src="@{/images/logo-hotel-premier.png}" alt="Hotel Premier" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+        <i class="fas fa-hotel" style="margin-right: 10px;"></i>
         Hotel Premier
     </div>
     <div class="navbar-user">
@@ -328,17 +328,29 @@
 </div>
 
 <script>
-    // Cargar datos desde sessionStorage
-    const reservaData = JSON.parse(sessionStorage.getItem('reservaData'));
+    const reservaDataRaw = sessionStorage.getItem('reservaData');
+    let listaHabitacionesRequest = [];
 
-    if (!reservaData || !reservaData.idsHabitaciones || reservaData.idsHabitaciones.length === 0) {
+    try {
+        if (reservaDataRaw) {
+            const reservaData = JSON.parse(reservaDataRaw);
+
+            if (Array.isArray(reservaData)) {
+                listaHabitacionesRequest = reservaData;
+            } else {
+                listaHabitacionesRequest = [reservaData];
+            }
+        }
+    } catch (e) {
+        console.error("Error al parsear JSON", e);
+    }
+
+    if (!listaHabitacionesRequest || listaHabitacionesRequest.length === 0) {
         alert('No hay datos de reserva. Redirigiendo al menú principal...');
         window.location.href = '/menu-principal';
     }
 
-    // Convertir inputs a mayúsculas automáticamente y aplicar restricciones
     document.addEventListener('DOMContentLoaded', function() {
-        // Convertir a mayúsculas apellido y nombres
         const inputsTexto = document.querySelectorAll('input[name="apellido"], input[name="nombres"]');
         inputsTexto.forEach(input => {
             input.addEventListener('input', function() {
@@ -347,7 +359,6 @@
             });
         });
 
-        // Restricción para teléfono
         const inputTelefono = document.querySelector('input[name="telefono"]');
         if (inputTelefono) {
             inputTelefono.addEventListener('input', function() {
@@ -356,7 +367,6 @@
         }
     });
 
-    // Validaciones
     function validarTextoSoloLetras(valor, campo) {
         if (valor.length > 100) return `El ${campo} no puede exceder los 100 caracteres`;
         const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
@@ -385,7 +395,6 @@
         const nombres = nombresInput.value.trim();
         const telefono = telefonoInput.value.trim();
 
-        // Validaciones básicas del front
         if (!apellido) { apellidoInput.setCustomValidity('Completa este campo'); apellidoInput.reportValidity(); apellidoInput.setCustomValidity(''); return; }
         if (!nombres) { nombresInput.setCustomValidity('Completa este campo'); nombresInput.reportValidity(); nombresInput.setCustomValidity(''); return; }
         if (!telefono) { telefonoInput.setCustomValidity('Completa este campo'); telefonoInput.reportValidity(); telefonoInput.setCustomValidity(''); return; }
@@ -397,14 +406,13 @@
         const errorTelefono = validarTelefono(telefono);
         if (errorTelefono) { mostrarError(errorTelefono); telefonoInput.focus(); return; }
 
-        // Construir DTO
         const requestDTO = {
-            fechaIngreso: reservaData.fechaIngreso,
-            fechaEgreso: reservaData.fechaEgreso,
+            fechaIngreso: listaHabitacionesRequest[0].fechaIngreso,
+            fechaEgreso: listaHabitacionesRequest[0].fechaEgreso,
             nombreHuesped: nombres,
             apellidoHuesped: apellido,
             telefonoHuesped: telefono,
-            idsHabitaciones: reservaData.idsHabitaciones
+            idsHabitaciones: listaHabitacionesRequest.map(item => item.idHabitacion)
         };
 
         const btnAceptar = document.getElementById('btnAceptar');
@@ -419,12 +427,10 @@
             });
 
             if (!response.ok) {
-                // Si falla (incluso por conflicto 409), cae aquí y lanza error genérico
                 const errorData = await response.text();
                 throw new Error(errorData || 'Error al registrar la reserva');
             }
 
-            // Éxito
             sessionStorage.removeItem('reservaData');
             document.getElementById('successMessage').textContent = '¡Reserva registrada exitosamente!';
             document.getElementById('successDialog').classList.add('active');
